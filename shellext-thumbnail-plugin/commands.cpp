@@ -1,7 +1,7 @@
 #include "ext-comm.h"
 
 #include "applet-connection.h"
-#include "../extensions/ext-utils.h"
+#include "ext-utils.h"
 
 #include "commands.h"
 

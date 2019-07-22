@@ -36,7 +36,7 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 #include <windows.h>
 
-#include "../../extensions/ext-utils.h"
+#include "../ext-utils.h"
 #include "../commands.h"
 // depend extension tool file
 

@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "../extensions/ext-utils.h"
+#include "ext-utils.h"
 #include "src/log.h"
 
 #include "applet-connection.h"
