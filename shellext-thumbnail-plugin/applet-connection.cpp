@@ -1,10 +1,10 @@
 #define __STDC_LIMIT_MACROS
-#include "ext-common.h"
+#include "ext-comm.h"
 
 #include <memory>
 
-#include "ext-utils.h"
-#include "log.h"
+#include "../extensions/ext-utils.h"
+#include "src/log.h"
 
 #include "applet-connection.h"
 
@@ -70,7 +70,7 @@ AppletConnection::connect ()
         CloseHandle (pipe_);
     }
     pipe_ = CreateFile(
-        pipe_name_,       // pipe name
+        seafile::utils::localeToWString(pipe_name_),       // pipe name
         GENERIC_READ |          // read and write access
         GENERIC_WRITE,
         0,                      // no sharing
@@ -81,7 +81,7 @@ AppletConnection::connect ()
 
     if (pipe_ == INVALID_HANDLE_VALUE) {
         if (GetLastError() != ERROR_FILE_NOT_FOUND) {
-            seaf_ext_log("Failed to create named pipe: %s", utils::formatErrorMessage().c_str());
+           LOGINFO(L"Failed to create named pipe: %s", utils::formatErrorMessage().c_str());
         }
         connected_ = false;
         last_conn_failure_ = utils::currentMSecsSinceEpoch();
@@ -90,7 +90,7 @@ AppletConnection::connect ()
 
     DWORD mode = PIPE_READMODE_MESSAGE;
     if (!SetNamedPipeHandleState(pipe_, &mode, NULL, NULL)) {
-        seaf_ext_log("Failed to set named pipe mode: %s", utils::formatErrorMessage().c_str());
+       LOGINFO(L"Failed to set named pipe mode: %s", utils::formatErrorMessage().c_str());
         onPipeError();
         last_conn_failure_ = utils::currentMSecsSinceEpoch();
         return false;
@@ -140,13 +140,13 @@ bool AppletConnection::writeRequest(const std::string& cmd)
     uint32_t len = cmd.size();
     if (!utils::pipeWriteN(pipe_, &len, sizeof(len))) {
         onPipeError();
-        seaf_ext_log("failed to send command: %s", utils::formatErrorMessage().c_str());
+       LOGINFO(L"failed to send command: %s", utils::formatErrorMessage().c_str());
         return false;
     }
 
     if (!utils::pipeWriteN(pipe_, cmd.c_str(), len)) {
         onPipeError();
-        seaf_ext_log("failed to send command: %s", utils::formatErrorMessage().c_str());
+       LOGINFO(L"failed to send command: %s", utils::formatErrorMessage().c_str());
         return false;
     }
     return true;
@@ -199,7 +199,7 @@ bool AppletConnection::sendWithReconnect(const std::string& cmd)
         } else if (!connected_ && connect()) {
             // Retry one more time when connection is broken. This normally
             // happens when seafile client was restarted.
-            seaf_ext_log ("reconnected to seafile cient");
+           LOGINFO(L"reconnected to seafile cient");
             if (writeRequest(cmd)) {
                 return true;
             }

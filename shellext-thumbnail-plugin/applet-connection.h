@@ -2,7 +2,7 @@
 #define SEAFILE_EXTENSION_APPLET_CONNECTION_H
 
 #include <string>
-#include "ext-utils.h"
+#include "../extensions/ext-utils.h"
 
 namespace seafile {
 

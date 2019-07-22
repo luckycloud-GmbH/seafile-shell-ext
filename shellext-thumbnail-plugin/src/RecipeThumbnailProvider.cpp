@@ -36,8 +36,10 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 #include <windows.h>
 
+#include "../../extensions/ext-utils.h"
+#include "../commands.h"
 // depend extension tool file
-#include "../extension/ext_utils.h"
+
 
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Crypt32.lib")
@@ -103,7 +105,7 @@ IFACEMETHODIMP RecipeThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfM
 {
     // A handler instance should be initialized only once in its lifetime.
     HRESULT hr = HRESULT_FROM_WIN32(ERROR_ALREADY_INITIALIZED);
-    file_path_ = wStringToLocale(pfilePath);
+    filepath_ = seafile::utils::wStringToLocale(pfilePath);
     //if (m_pStream == NULL)
     //{
     //    // Take a reference to the stream if it has not been initialized yet.
@@ -136,21 +138,20 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     seafile::GetCachedStatusCommand cmd(filepath_);
     seafile::CachedStatus status;
     if (cmd.sendAndWait(&status)) {
-        return seafile::nocached;
+        return seafile::NoCached;
     }
 
-    seafile::GetSeadriveMountLetter cmd();
+    seafile::GetSeadriveMountLetter letcmd;
     seafile::DISK_LETTER_TYPE disk_letter;
 
-    current_disk_letter = getBaseName(filepath_);
+   std::string current_disk_letter = seafile::utils::getBaseName(filepath_);
 
-
-    if (cmd.sendAndWait(&disk_letter)){
-         disk_letter= "";
+    if (letcmd.sendAndWait(&disk_letter)){
+         disk_letter.clear();
     }
 
     if (disk_letter == current_disk_letter){
-        if (status == seafile::cached)
+        if (status == seafile::Cached)
         {
             // TODO: 文件已经缓存到了本地，直接加载已经缓存的文件
         } else {
@@ -158,10 +159,9 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         }
 
     } else {
-        LOGINFO("current dir is not in seadrive dir");
+        LOGINFO(L"current dir is not in seadrive dir");
     }
 
-    if (is_seadrive_dir)
     *phbmp = (HBITMAP)LoadImage( NULL, L"C:\\Users\\sun\\1.bmp", IMAGE_BITMAP, 0, 0,
                LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
 
