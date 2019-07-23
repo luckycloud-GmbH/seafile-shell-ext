@@ -18,6 +18,11 @@ std::string GetCachedStatusCommand::serialize()
     return path_;
 }
 
+std::string GetCachedStatusCommand::serializeForDrive()
+{
+	serialize();
+}
+
 bool GetCachedStatusCommand::parseDriveResponse(const std::string& raw_resp,
                                                 CachedStatus *status)
 {
@@ -37,8 +42,12 @@ GetSeadriveMountLetter::GetSeadriveMountLetter()
 {
 }
 
+std::string GetSeadriveMountLetter::serialize() {
+	return "";
+}
+
 std::string GetSeadriveMountLetter::serializeForDrive(){
-    return "";
+    return serialize();
 }
 
 bool GetSeadriveMountLetter::parseDriveResponse(const std::string &raw_resp,

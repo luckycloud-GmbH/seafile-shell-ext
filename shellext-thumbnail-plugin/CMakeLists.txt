@@ -17,7 +17,7 @@ FILE(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
 SET(ext_sources
     applet-connection.cpp
     commands.cpp
-    ../extensions/ext-utils.cpp
+	ext-utils.cpp
 )
 
 SET(DEFS ${CMAKE_CURRENT_SOURCE_DIR}/src/ExportFunctions.def)

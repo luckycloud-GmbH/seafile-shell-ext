@@ -12,9 +12,11 @@
 #include <algorithm>
 #include <memory>
 
-#include "log.h"
+#include "src/log.h"
 #include "ext-utils.h"
-#include "shell-ext.h"
+
+#include <UserEnv.h>
+#pragma comment(lib, "Userenv.lib")
 
 namespace {
 
@@ -126,7 +128,7 @@ namespace seafile {
 
 			if (!home) {
 				/* Try env variable first. */
-				GetEnvironmentVariable("HOME", buf, MAX_PATH);
+				GetEnvironmentVariableA("HOME", buf, MAX_PATH);
 				if (buf[0] != '\0')
 					home = strdup(buf);
 			}
@@ -136,7 +138,7 @@ namespace seafile {
 				HANDLE hToken = NULL;
 				DWORD len = MAX_PATH;
 				if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
-					GetUserProfileDirectory(hToken, buf, &len);
+					GetUserProfileDirectoryA(hToken, buf, &len);
 					CloseHandle(hToken);
 					if (buf[0] != '\0')
 						home = strdup(buf);
@@ -156,18 +158,18 @@ namespace seafile {
 			if (result == WAIT_OBJECT_0) {
 				if (!GetOverlappedResult(pipe, ol, &bytes_rw, false)
 					|| bytes_rw != len) {
-					seaf_ext_log("async read failed: %s",
+					LOGINFO(L"async read failed: %s",
 						formatErrorMessage().c_str());
 					return false;
 				}
 			}
 			else if (result == WAIT_TIMEOUT) {
-				seaf_ext_log("connection timeout");
+				LOGINFO(L"connection timeout");
 				return false;
 
 			}
 			else {
-				seaf_ext_log("failed to communicate with seafil client: %s",
+				LOGINFO(L"failed to communicate with seafil client: %s",
 					formatErrorMessage().c_str());
 				return false;
 			}
@@ -182,11 +184,11 @@ namespace seafile {
 			if (last_error != ERROR_IO_PENDING && last_error != ERROR_SUCCESS) {
 				if (last_error == ERROR_BROKEN_PIPE || last_error == ERROR_NO_DATA
 					|| last_error == ERROR_PIPE_NOT_CONNECTED) {
-					seaf_ext_log("connection broken with error: %s",
+					LOGINFO(L"connection broken with error: %s",
 						formatErrorMessage().c_str());
 				}
 				else {
-					seaf_ext_log("failed to communicate with seafile client: %s",
+					LOGINFO(L"failed to communicate with seafile client: %s",
 						formatErrorMessage().c_str());
 				}
 				return false;
@@ -253,7 +255,7 @@ namespace seafile {
 				&tid);                 /* thread ID */
 
 			if (!thread) {
-				seaf_ext_log("failed to create thread");
+				LOGINFO(L"failed to create thread");
 				return false;
 			}
 
@@ -269,7 +271,7 @@ namespace seafile {
 				return "no error";
 			}
 			char buf[256] = { 0 };
-			::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+			::FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,
 				NULL,
 				error_code,
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -374,8 +376,8 @@ namespace seafile {
 
 			if (module_filename[0] == '\0') {
 				DWORD module_size;
-				module_size = GetModuleFileName(
-					g_hmodThisDll, module_filename, MAX_PATH);
+				module_size = GetModuleFileNameA(
+					g_hInst, module_filename, MAX_PATH);
 				if (!module_size)
 					return "";
 
@@ -514,17 +516,18 @@ namespace seafile {
 		{
 			char buf[32767] = { 0 };
 			DWORD retlen = 32767;
-			CryptBinaryToString((BYTE*)input, strlen(input), CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, buf, &retlen);
+			CryptBinaryToStringA((BYTE*)input, strlen(input), CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, buf, &retlen);
 			return strdup(buf);
 		}
 
 		std::string getLocalPipeName(const char* pipe_name)
 		{
+			const DWORD BUF_SIZE = 32767;
 			DWORD buf_char_count = 32767;
-			char user_name_buf[buf_char_count];
+			char user_name_buf[BUF_SIZE];
 
-			if (GetUserName(user_name_buf, &buf_char_count) == 0) {
-				seaf_ext_log("Failed to get user name, GLE=%lu\n",
+			if (GetUserNameA(user_name_buf, &buf_char_count) == 0) {
+				LOGINFO(L"Failed to get user name, GLE=%lu\n",
 					GetLastError());
 				return pipe_name;
 			}

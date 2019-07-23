@@ -5,6 +5,7 @@
 #include <vector>
 #include <stdint.h>
 
+extern HINSTANCE  g_hInst;
 namespace seafile {
 	namespace utils {
 
