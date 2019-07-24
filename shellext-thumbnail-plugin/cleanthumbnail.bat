@@ -1,6 +1,6 @@
 @echo off
 
-title 自动清理图标缓存
+title Clean thumbnail cached
 
 taskkill /f /im explorer.exe
 

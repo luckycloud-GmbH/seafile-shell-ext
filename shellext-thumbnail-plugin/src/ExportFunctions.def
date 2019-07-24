@@ -1,4 +1,4 @@
-LIBRARY	"CppShellExtThumbnailHandler"
+LIBRARY	"WindowsThumbnail"
 EXPORTS
     DllGetClassObject   PRIVATE
     DllCanUnloadNow     PRIVATE

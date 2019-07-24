@@ -29,7 +29,7 @@ public:
 
 private:
 	void ChangeLogFile();
-	// 全局文件指针
+	// global pointer	
 	FILE* m_fp;
 	unsigned int m_ulFileSize;
 	unsigned char m_ucLevel;

@@ -23,26 +23,7 @@ CMyLog::CMyLog()
 	assert(home != NULL);
 	m_path = m_path + home;
 
-	m_path = m_path + "\\AppData\\Local";
-	if (_access(m_path.c_str(), 0))
-	{
-		printf("HOME\\AppData\\Local dir not exist\n");
-		return;
-	}
-
-	m_path = m_path + "\\install";
-	if (_access(m_path.c_str(), 0))
-	{
-		_mkdir(m_path.c_str());
-	}
-
-	m_path = m_path + "\\ThumbnailHandler";
-	if (_access(m_path.c_str(), 0))
-	{
-		_mkdir(m_path.c_str());
-	}
-
-	std::string logfile = m_path + "\\Thumbnail.log";
+	std::string logfile = m_path + "\\windows_thumbnail.log";
 	m_fp = fopen(logfile.c_str(), "a+");
 
 	if (!m_fp)
@@ -63,7 +44,7 @@ CMyLog::~CMyLog()
 }
 
 /**
- * 单例实现
+ * single instance
  */
 CMyLog& CMyLog::GetInstance()
 {
@@ -149,13 +130,13 @@ void CMyLog::Log(unsigned char level, const wchar_t* str)
 }
 
 /**
- * 判断日志文件大小，进行重命名存档
+ * Judget log size
  */
 void CMyLog::ChangeLogFile()
 {
 	std::string origfile = m_path + "/Thumbnail.log";
 
-	// stat()函数获取文件信息，判断文件大小
+	// stat() Get file information of size
 	struct stat statbuff;
 	if (stat(origfile.c_str(), &statbuff) < 0)
 	{
@@ -183,7 +164,7 @@ void CMyLog::ChangeLogFile()
 		tmt->tm_sec);
 
 	std::string newfile = m_path + filename;
-	// 原日志文件超过尺寸，更改日志文件名称存档，后续日志以原日志文件名称保存
+
 	rename(origfile.c_str(), newfile.c_str());
 	m_fp = fopen(origfile.c_str(), "a+");
 	if (!m_fp)

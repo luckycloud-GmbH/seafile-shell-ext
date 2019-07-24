@@ -47,20 +47,21 @@ long        g_cDllRef   = 0;
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-	switch (dwReason)
-	{
-	case DLL_PROCESS_ATTACH:
+    LOGINFO(L"begin to load windows thumbnail plugin");
+    switch (dwReason)
+    {
+    case DLL_PROCESS_ATTACH:
         // Hold the instance of this DLL module, we will use it to get the
         // path of the DLL to register the component.
         g_hInst = hModule;
         DisableThreadLibraryCalls(hModule);
         break;
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-		break;
-	}
-	return TRUE;
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
 }
 
 
@@ -117,6 +118,7 @@ STDAPI DllCanUnloadNow(void)
 //
 STDAPI DllRegisterServer(void)
 {
+    LOGINFO(L"register dll server");
     HRESULT hr;
 
     wchar_t szModule[MAX_PATH];
@@ -164,6 +166,7 @@ STDAPI DllRegisterServer(void)
 //
 STDAPI DllUnregisterServer(void)
 {
+    LOGINFO(L"dll unregister server");
     HRESULT hr = S_OK;
 
     wchar_t szModule[MAX_PATH];
