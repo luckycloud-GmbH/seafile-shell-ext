@@ -62,6 +62,7 @@ namespace seafile {
 
         std::string getBaseName(const std::string& path);
         std::string getParentPath(const std::string& path);
+        std::string getDiskLetterName(const std::string& path);
 
         std::string getThisDllFolder();
         std::string getThisDllPath();

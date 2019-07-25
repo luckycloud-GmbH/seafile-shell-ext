@@ -322,7 +322,7 @@ namespace seafile {
             return temp;
         }
 
-        std::string splitPath(const std::string& path, int* pos)
+        std::string splitPath(const std::string& path, int* pos, bool is_split_for_get_disk_letter = false)
         {
             if (path.size() == 0) {
                 return "";
@@ -336,7 +336,12 @@ namespace seafile {
                 return p;
             }
 
-            *pos = p.rfind("/");
+            if (is_split_for_get_disk_letter) {
+                *pos = p.find("/");
+            }
+            else {
+                *pos = p.rfind("/");
+            }
             return p;
         }
 
@@ -351,6 +356,23 @@ namespace seafile {
 
             if (pos == -1)
                 return "";
+            if (pos == 0)
+                return "/";
+            return p.substr(0, pos);
+        }
+
+        std::string getDiskLetterName(const std::string& path)
+        {
+
+            int pos;
+            std::string p = splitPath(path, &pos, true);
+            if (p.size() <= 1) {
+                return p;
+            }
+
+            if (pos == -1)
+                return "";
+
             if (pos == 0)
                 return "/";
             return p.substr(0, pos);

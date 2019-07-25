@@ -144,7 +144,8 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     seafile::GetSeadriveMountLetter letcmd;
     seafile::DISK_LETTER_TYPE disk_letter;
 
-   std::string current_disk_letter = seafile::utils::getBaseName(filepath_);
+    std::string current_disk_letter = seafile::utils::getDiskLetterName(filepath_);
+    LOGINFO(L"current_disk_letter %s", seafile::utils::localeToWString(current_disk_letter));
 
     if (letcmd.sendAndWait(&disk_letter)){
          disk_letter.clear();
@@ -159,9 +160,9 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         }
 
     } else {
-        LOGINFO(L"current dir is not in seadrive dir, \
-        current dir in diskletter is %s, seadrive mount diskletter is %s",\
-        seafile::utils::localeToWString(current_disk_letter), \
+        LOGINFO(L"current dir is not in seadrive dir,\
+        current dir in diskletter is [%s], seadrive mount diskletter is [%s]",\
+        seafile::utils::localeToWString(current_disk_letter),\
         seafile::utils::localeToWString(disk_letter)
         );
     }
