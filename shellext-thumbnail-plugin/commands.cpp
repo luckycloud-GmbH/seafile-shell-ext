@@ -20,7 +20,7 @@ std::string GetCachedStatusCommand::serialize()
 
 std::string GetCachedStatusCommand::serializeForDrive()
 {
-	serialize();
+    serialize();
 }
 
 bool GetCachedStatusCommand::parseDriveResponse(const std::string& raw_resp,
@@ -43,7 +43,7 @@ GetSeadriveMountLetter::GetSeadriveMountLetter()
 }
 
 std::string GetSeadriveMountLetter::serialize() {
-	return "";
+    return "";
 }
 
 std::string GetSeadriveMountLetter::serializeForDrive(){
