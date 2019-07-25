@@ -9,12 +9,12 @@
 namespace seafile
 {
 
-	enum CachedStatus {
-		NoCached = 0,
-		Cached,
-	};
+    enum CachedStatus {
+        NoCached = 0,
+        Cached,
+    };
 
-	typedef std::string DISK_LETTER_TYPE;
+    typedef std::string DISK_LETTER_TYPE;
 /**
  * Abstract base class for all one-way commands, e.g. don't require a response
  * from seafile/seadrive client.
@@ -130,12 +130,12 @@ private:
 // get seadrive mount dir
 class GetSeadriveMountLetter : public AppletCommand <DISK_LETTER_TYPE> {
 public:
-	GetSeadriveMountLetter();
+    GetSeadriveMountLetter();
 protected:
-	std::string serialize();
-	std::string serializeForDrive();
-	bool parseDriveResponse(const std::string& raw_resp,
-		DISK_LETTER_TYPE* letter);
+    std::string serialize();
+    std::string serializeForDrive();
+    bool parseDriveResponse(const std::string& raw_resp,
+        DISK_LETTER_TYPE* letter);
 };
 
 } // namespace seafile

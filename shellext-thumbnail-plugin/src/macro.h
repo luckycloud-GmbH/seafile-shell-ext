@@ -9,28 +9,28 @@
 #define CC_DELETE_MIN(p) \
 if (p) \
 {\
-	delete p;\
+    delete p;\
 }
 
 #define CC_DELETE(p) \
 if (p) \
 {\
-	delete p;\
-	p = NULL;\
+    delete p;\
+    p = NULL;\
 }
 
 #define CC_DELETE_ARRAY(p) \
 if (p) \
 {\
-	delete[] p;\
-	p = NULL;\
+    delete[] p;\
+    p = NULL;\
 }
 
 #define CC_FREE(p) \
 if (p) \
 {\
-	free(p);\
-	p = NULL;\
+    free(p);\
+    p = NULL;\
 }
 
 #if (defined _WIN32 || defined _WIN64)

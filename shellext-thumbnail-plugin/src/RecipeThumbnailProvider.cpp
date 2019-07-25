@@ -159,7 +159,11 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         }
 
     } else {
-        LOGINFO(L"current dir is not in seadrive dir");
+        LOGINFO(L"current dir is not in seadrive dir, \
+        current dir in diskletter is %s, seadrive mount diskletter is %s",\
+        seafile::utils::localeToWString(current_disk_letter), \
+        seafile::utils::localeToWString(disk_letter)
+        );
     }
 
     *phbmp = (HBITMAP)LoadImage( NULL, L"C:\\Users\\sun\\1.bmp", IMAGE_BITMAP, 0, 0,

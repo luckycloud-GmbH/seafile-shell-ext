@@ -17,29 +17,29 @@
 #include <pthread.h>
 #endif
 
-class  CMyLog
+class CMyLog
 {
 public:
-	CMyLog();
-	~CMyLog();
+    CMyLog();
+    ~CMyLog();
 
-	static CMyLog& GetInstance();
-	void Log(unsigned char level, const wchar_t* file, int line, const wchar_t* fmt, ...);
-	void Log(unsigned char level, const wchar_t* str);
+    static CMyLog& GetInstance();
+    void Log(unsigned char level, const wchar_t* file, int line, const wchar_t* fmt, ...);
+    void Log(unsigned char level, const wchar_t* str);
 
 private:
-	void ChangeLogFile();
-	// global pointer	
-	FILE* m_fp;
-	unsigned int m_ulFileSize;
-	unsigned char m_ucLevel;
+    void ChangeLogFile();
+    // global pointer
+    FILE* m_fp;
+    unsigned int m_ulFileSize;
+    unsigned char m_ucLevel;
 
-	std::string m_path;
+    std::string m_path;
 
 #if (defined _WIN32 || defined _WIN64)
-	HANDLE m_hMutex;
+    HANDLE m_hMutex;
 #else
-	pthread_mutex_t m_mutex;
+    pthread_mutex_t m_mutex;
 #endif
 
 };
