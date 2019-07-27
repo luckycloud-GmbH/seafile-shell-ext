@@ -20,7 +20,7 @@ std::string GetCachedStatusCommand::serialize()
 
 std::string GetCachedStatusCommand::serializeForDrive()
 {
-    serialize();
+	return serialize();
 }
 
 bool GetCachedStatusCommand::parseDriveResponse(const std::string& raw_resp,

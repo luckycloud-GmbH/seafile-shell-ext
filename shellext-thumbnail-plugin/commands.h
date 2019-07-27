@@ -62,7 +62,6 @@ protected:
  * Abstract base class for all commands that also requires response from
  * seafile/seadrive client.
  */
-// TODO: 类模板，可以是seafile 类的响应，也可以是 seadrive 类的响应
 template <class T>
 class AppletCommand : public SimpleAppletCommand
 {

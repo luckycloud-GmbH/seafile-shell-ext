@@ -111,6 +111,7 @@ bool AppletConnection::sendCommand(const std::string& cmd)
 
 bool AppletConnection::sendCommandAndWait(const std::string& cmd, std::string *resp)
 {
+    LOGINFO(L"the data send to server is %s", seafile::utils::localeToWString(cmd));
     utils::MutexLocker lock(&mutex_);
     if (!sendWithReconnect(cmd)) {
         return false;

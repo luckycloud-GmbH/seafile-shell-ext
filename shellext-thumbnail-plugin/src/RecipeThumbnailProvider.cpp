@@ -135,6 +135,7 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 {
     LOGINFO(L"GetThumbnail");
 
+    // get cached status
     seafile::GetCachedStatusCommand cmd(filepath_);
     seafile::CachedStatus status;
     if (cmd.sendAndWait(&status)) {
@@ -144,12 +145,12 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     seafile::GetSeadriveMountLetter letcmd;
     seafile::DISK_LETTER_TYPE disk_letter;
 
-    std::string current_disk_letter = seafile::utils::getDiskLetterName(filepath_);
-    LOGINFO(L"current_disk_letter %s", seafile::utils::localeToWString(current_disk_letter));
-
     if (letcmd.sendAndWait(&disk_letter)){
          disk_letter.clear();
     }
+
+    std::string current_disk_letter = seafile::utils::getDiskLetterName(filepath_);
+    LOGINFO(L"current_disk_letter %s", seafile::utils::localeToWString(current_disk_letter));
 
     if (disk_letter == current_disk_letter){
         if (status == seafile::Cached)
