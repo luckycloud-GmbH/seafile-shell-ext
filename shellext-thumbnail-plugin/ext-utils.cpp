@@ -338,8 +338,7 @@ namespace seafile {
 
             if (is_split_for_get_disk_letter) {
                 *pos = p.find("/");
-            }
-            else {
+            } else {
                 *pos = p.rfind("/");
             }
             return p;
@@ -552,8 +551,7 @@ namespace seafile {
                 LOGINFO(L"Failed to get user name, GLE=%lu\n",
                     GetLastError());
                 return pipe_name;
-            }
-            else {
+            } else {
                 std::string ret(pipe_name);
                 char* encoded = b64encode(user_name_buf);
                 ret += encoded;

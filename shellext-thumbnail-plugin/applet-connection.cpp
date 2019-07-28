@@ -90,7 +90,7 @@ AppletConnection::connect ()
 
     DWORD mode = PIPE_READMODE_MESSAGE;
     if (!SetNamedPipeHandleState(pipe_, &mode, NULL, NULL)) {
-       LOGINFO(L"Failed to set named pipe mode: %s", utils::formatErrorMessage().c_str());
+        LOGINFO(L"Failed to set named pipe mode: %s", utils::formatErrorMessage().c_str());
         onPipeError();
         last_conn_failure_ = utils::currentMSecsSinceEpoch();
         return false;
@@ -141,13 +141,13 @@ bool AppletConnection::writeRequest(const std::string& cmd)
     uint32_t len = cmd.size();
     if (!utils::pipeWriteN(pipe_, &len, sizeof(len))) {
         onPipeError();
-       LOGINFO(L"failed to send command: %s", utils::formatErrorMessage().c_str());
+        LOGINFO(L"failed to send command: %s", utils::formatErrorMessage().c_str());
         return false;
     }
 
     if (!utils::pipeWriteN(pipe_, cmd.c_str(), len)) {
         onPipeError();
-       LOGINFO(L"failed to send command: %s", utils::formatErrorMessage().c_str());
+        LOGINFO(L"failed to send command: %s", utils::formatErrorMessage().c_str());
         return false;
     }
     return true;
@@ -200,7 +200,7 @@ bool AppletConnection::sendWithReconnect(const std::string& cmd)
         } else if (!connected_ && connect()) {
             // Retry one more time when connection is broken. This normally
             // happens when seafile client was restarted.
-           LOGINFO(L"reconnected to seafile cient");
+            LOGINFO(L"reconnected to seafile cient");
             if (writeRequest(cmd)) {
                 return true;
             }

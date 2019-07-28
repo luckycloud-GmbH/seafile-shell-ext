@@ -45,33 +45,30 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 //
 HRESULT SetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName, PCWSTR pszData, UINT type)
 {
-	HRESULT hr;
-	HKEY hKey = NULL;
+    HRESULT hr;
+    HKEY hKey = NULL;
 
-	// Creates the specified registry key. If the key already exists, the
-	// function opens it.
-	hr = HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_CLASSES_ROOT, pszSubKey, 0,
-		NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL));
+    // Creates the specified registry key. If the key already exists, the
+    // function opens it.
+    hr = HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_CLASSES_ROOT, pszSubKey, 0,
+        NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL));
 
-	if (SUCCEEDED(hr))
-	{
-		if (pszData != NULL)
-		{
-			// Set the specified value of the key.
-			DWORD cbData = lstrlen(pszData) * sizeof(*pszData);
-			if (type == REG_DWORD)
-			{
-				cbData = 4;
-			}
+    if (SUCCEEDED(hr)) {
+        if (pszData != NULL) {
+            // Set the specified value of the key.
+            DWORD cbData = lstrlen(pszData) * sizeof(*pszData);
+            if (type == REG_DWORD) {
+                cbData = 4;
+            }
 
-			hr = HRESULT_FROM_WIN32(RegSetValueEx(hKey, pszValueName, 0, type, reinterpret_cast<const BYTE *>(pszData), cbData));
+            hr = HRESULT_FROM_WIN32(RegSetValueEx(hKey, pszValueName, 0, type, reinterpret_cast<const BYTE *>(pszData), cbData));
 
-		}
+        }
 
-		RegCloseKey(hKey);
-	}
+        RegCloseKey(hKey);
+    }
 
-	return hr;
+    return hr;
 }
 
 
@@ -105,8 +102,7 @@ HRESULT GetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName,
     hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CLASSES_ROOT, pszSubKey, 0,
         KEY_READ, &hKey));
 
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         // Get the data for the specified value name.
         hr = HRESULT_FROM_WIN32(RegQueryValueEx(hKey, pszValueName, NULL,
             NULL, reinterpret_cast<LPBYTE>(pszData), &cbData));
@@ -150,8 +146,7 @@ HRESULT GetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName,
 HRESULT RegisterInprocServer(PCWSTR pszModule, const CLSID& clsid,
     PCWSTR pszFriendlyName, PCWSTR pszThreadModel)
 {
-    if (pszModule == NULL || pszThreadModel == NULL)
-    {
+    if (pszModule == NULL || pszThreadModel == NULL) {
         return E_INVALIDARG;
     }
 
@@ -164,25 +159,21 @@ HRESULT RegisterInprocServer(PCWSTR pszModule, const CLSID& clsid,
 
     // Create the HKCR\CLSID\{<CLSID>} key.
     hr = StringCchPrintf(szSubkey, ARRAYSIZE(szSubkey), L"CLSID\\%s", szCLSID);
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         hr = SetHKCRRegistryKeyAndValue(szSubkey, NULL, pszFriendlyName, REG_SZ);
 
         // Create the HKCR\CLSID\{<CLSID>}\InprocServer32 key.
-        if (SUCCEEDED(hr))
-        {
-			WCHAR data[4] = { 0x01, 0x00, 0x00, 0x00 };
-			SetHKCRRegistryKeyAndValue(szSubkey, L"DisableProcessIsolation", data, REG_DWORD);
+        if (SUCCEEDED(hr)) {
+            WCHAR data[4] = { 0x01, 0x00, 0x00, 0x00 };
+            SetHKCRRegistryKeyAndValue(szSubkey, L"DisableProcessIsolation", data, REG_DWORD);
 
             hr = StringCchPrintf(szSubkey, ARRAYSIZE(szSubkey),
                 L"CLSID\\%s\\InprocServer32", szCLSID);
-            if (SUCCEEDED(hr))
-            {
+            if (SUCCEEDED(hr)) {
                 // Set the default value of the InprocServer32 key to the
                 // path of the COM module.
                 hr = SetHKCRRegistryKeyAndValue(szSubkey, NULL, pszModule, REG_SZ);
-                if (SUCCEEDED(hr))
-                {
+                if (SUCCEEDED(hr)) {
                     // Set the threading model of the component.
                     hr = SetHKCRRegistryKeyAndValue(szSubkey,
                         L"ThreadingModel", pszThreadModel, REG_SZ);
@@ -216,8 +207,7 @@ HRESULT UnregisterInprocServer(const CLSID& clsid)
 
     // Delete the HKCR\CLSID\{<CLSID>} key.
     hr = StringCchPrintf(szSubkey, ARRAYSIZE(szSubkey), L"CLSID\\%s", szCLSID);
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         hr = HRESULT_FROM_WIN32(RegDeleteTree(HKEY_CLASSES_ROOT, szSubkey));
     }
 
@@ -251,8 +241,7 @@ HRESULT UnregisterInprocServer(const CLSID& clsid)
 //
 HRESULT RegisterShellExtThumbnailHandler(PCWSTR pszFileType, const CLSID& clsid)
 {
-    if (pszFileType == NULL)
-    {
+    if (pszFileType == NULL) {
         return E_INVALIDARG;
     }
 
@@ -266,16 +255,14 @@ HRESULT RegisterShellExtThumbnailHandler(PCWSTR pszFileType, const CLSID& clsid)
     // If pszFileType starts with '.', try to read the default value of the
     // HKCR\<File Type> key which contains the ProgID to which the file type
     // is linked.
-    if (*pszFileType == L'.')
-    {
+    if (*pszFileType == L'.') {
         wchar_t szDefaultVal[260];
         hr = GetHKCRRegistryKeyAndValue(pszFileType, NULL, szDefaultVal,
             sizeof(szDefaultVal));
 
         // If the key exists and its default value is not empty, use the
         // ProgID as the file type.
-        if (SUCCEEDED(hr) && szDefaultVal[0] != L'\0')
-        {
+        if (SUCCEEDED(hr) && szDefaultVal[0] != L'\0') {
             pszFileType = szDefaultVal;
         }
     }
@@ -284,8 +271,7 @@ HRESULT RegisterShellExtThumbnailHandler(PCWSTR pszFileType, const CLSID& clsid)
     // HKCR\<File Type>\shellex\{e357fccd-a995-4576-b01f-234630154e96}
     hr = StringCchPrintf(szSubkey, ARRAYSIZE(szSubkey),
         L".%s\\shellex\\{e357fccd-a995-4576-b01f-234630154e96}", pszFileType);
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         // Set the default value of the key.
         hr = SetHKCRRegistryKeyAndValue(szSubkey, NULL, szCLSID, REG_SZ);
     }
@@ -309,8 +295,7 @@ HRESULT RegisterShellExtThumbnailHandler(PCWSTR pszFileType, const CLSID& clsid)
 //
 HRESULT UnregisterShellExtThumbnailHandler(PCWSTR pszFileType)
 {
-    if (pszFileType == NULL)
-    {
+    if (pszFileType == NULL) {
         return E_INVALIDARG;
     }
 
@@ -321,16 +306,14 @@ HRESULT UnregisterShellExtThumbnailHandler(PCWSTR pszFileType)
     // If pszFileType starts with '.', try to read the default value of the
     // HKCR\<File Type> key which contains the ProgID to which the file type
     // is linked.
-    if (*pszFileType == L'.')
-    {
+    if (*pszFileType == L'.') {
         wchar_t szDefaultVal[260];
         hr = GetHKCRRegistryKeyAndValue(pszFileType, NULL, szDefaultVal,
             sizeof(szDefaultVal));
 
         // If the key exists and its default value is not empty, use the
         // ProgID as the file type.
-        if (SUCCEEDED(hr) && szDefaultVal[0] != L'\0')
-        {
+        if (SUCCEEDED(hr) && szDefaultVal[0] != L'\0') {
             pszFileType = szDefaultVal;
         }
     }
@@ -339,8 +322,7 @@ HRESULT UnregisterShellExtThumbnailHandler(PCWSTR pszFileType)
     // HKCR\<File Type>\shellex\{e357fccd-a995-4576-b01f-234630154e96}
     hr = StringCchPrintf(szSubkey, ARRAYSIZE(szSubkey),
         L".%s\\shellex\\{e357fccd-a995-4576-b01f-234630154e96}", pszFileType);
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         hr = HRESULT_FROM_WIN32(RegDeleteTree(HKEY_CLASSES_ROOT, szSubkey));
     }
 

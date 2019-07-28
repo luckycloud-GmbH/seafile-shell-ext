@@ -11,8 +11,7 @@ CMyLog::CMyLog()
     m_ucLevel = LOG_LEVEL_INFO;
 
     m_hMutex = CreateMutex(NULL, false, NULL);
-    if (!m_hMutex)
-    {
+    if (!m_hMutex) {
         printf("CreateMutex fail\r\n");
     }
 
@@ -26,8 +25,7 @@ CMyLog::CMyLog()
     std::string logfile = m_path + "\\windows_thumbnail.log";
     m_fp = fopen(logfile.c_str(), "a+");
 
-    if (!m_fp)
-    {
+    if (!m_fp) {
         printf("Open log file fail\r\n");
         return;
     }
@@ -35,8 +33,7 @@ CMyLog::CMyLog()
 
 CMyLog::~CMyLog()
 {
-    if (m_fp)
-    {
+    if (m_fp) {
         fclose(m_fp);
     }
 
@@ -50,8 +47,7 @@ CMyLog& CMyLog::GetInstance()
 {
     static CMyLog* pLog = NULL;
 
-    if (!pLog)
-    {
+    if (!pLog) {
         pLog = new CMyLog;
     }
 
@@ -62,8 +58,7 @@ void CMyLog::Log(unsigned char level, const wchar_t* file, int line, const wchar
 {
     static wchar_t LogLevelString[][10] = {L"ERROR", L"INFO ", L"DEBUG"};
 
-    if (level > m_ucLevel)
-    {
+    if (level > m_ucLevel) {
         return;
     }
 
@@ -73,8 +68,7 @@ void CMyLog::Log(unsigned char level, const wchar_t* file, int line, const wchar
     va_list arg;
 
     /* to log file */
-    if (m_fp)
-    {
+    if (m_fp) {
         fwprintf(m_fp, L"%04d-%02d-%02d %02d:%02d:%02d %s ",
             tmt->tm_year + 1900,
             tmt->tm_mon + 1,
@@ -101,8 +95,7 @@ void CMyLog::Log(unsigned char level, const wchar_t* file, int line, const wchar
 void CMyLog::Log(unsigned char level, const wchar_t* str)
 {
     static wchar_t LogLevelString[][10] = { L"ERROR", L"INFO ", L"DEBUG" };
-    if (level > m_ucLevel)
-    {
+    if (level > m_ucLevel) {
         return;
     }
 
@@ -110,8 +103,7 @@ void CMyLog::Log(unsigned char level, const wchar_t* str)
     time_t timer = time(NULL);
     struct tm *tmt = localtime(&timer);
     /* to log file */
-    if (m_fp)
-    {
+    if (m_fp) {
         fwprintf(m_fp, L"%04d-%02d-%02d %02d:%02d:%02d %s %s\n",
             tmt->tm_year + 1900,
             tmt->tm_mon + 1,
@@ -138,13 +130,11 @@ void CMyLog::ChangeLogFile()
 
     // stat() Get file information of size
     struct stat statbuff;
-    if (stat(origfile.c_str(), &statbuff) < 0)
-    {
+    if (stat(origfile.c_str(), &statbuff) < 0) {
         return;
     }
 
-    if (statbuff.st_size  < (int)m_ulFileSize)
-    {
+    if (statbuff.st_size  < (int)m_ulFileSize) {
         return;
     }
 
@@ -167,8 +157,7 @@ void CMyLog::ChangeLogFile()
 
     rename(origfile.c_str(), newfile.c_str());
     m_fp = fopen(origfile.c_str(), "a+");
-    if (!m_fp)
-    {
+    if (!m_fp) {
         printf("Failed to open log file.\r\n");
     }
 }
