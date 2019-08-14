@@ -77,5 +77,5 @@ private:
 
     HRESULT WICCreate32bppHBITMAP(IStream *pstm, HBITMAP *phbmp,
                                   WTS_ALPHATYPE *pdwAlpha);
-    HBITMAP * GetsHBITMAPFromFile();
+    HBITMAP * GetsHBITMAPFromFile(LPCWSTR pfilePath);
 };

@@ -33,6 +33,7 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 #include <Shlwapi.h>
 #include <Wincrypt.h>   // For CryptStringToBinary.
 #include <msxml6.h>
+#include <shobjidl.h>   //For IShellItemImageFactory
 
 #include <windows.h>
 #include <algorithm>
@@ -283,6 +284,53 @@ HRESULT RecipeThumbnailProvider::WICCreate32bppHBITMAP(IStream *pstm,
         pImagingFactory->Release();
     }
     return hr;
+}
+
+HBITMAP * GetsHBITMAPFromFile(LPCWSTR pfilePath)
+{
+    PCWSTR pwszError = NULL;
+
+    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    if (SUCCEEDED(hr))
+    {
+        // Getting the IShellItemImageFactory interface pointer for the file.
+        IShellItemImageFactory *pImageFactory;
+        hr = SHCreateItemFromParsingName(pfilePath, NULL, IID_PPV_ARGS(&pImageFactory));
+        if (SUCCEEDED(hr))
+        {
+            SIZE size = {128, 128};
+
+            //sz - Size of the image, SIIGBF_BIGGERSIZEOK - GetImage will stretch down the bitmap (preserving aspect ratio)
+            HBITMAP hbmp;
+            hr = pImageFactory->GetImage(size, SIIGBF_BIGGERSIZEOK, &hbmp);
+            if (SUCCEEDED(hr))
+            {
+                return hbmp;
+                DeleteObject(hbmp);
+            }
+            else
+            {
+                pwszError = L"IShellItemImageFactory::GetImage failed with error code %x";
+            }
+
+            pImageFactory->Release();
+        }
+        else
+        {
+            pwszError = L"SHCreateItemFromParsingName failed with error %x";
+        }
+
+        CoUninitialize();
+    }
+    else
+    {
+        pwszError = L"CoInitializeEx failed with error code %x";
+    }
+
+    if (FAILED(hr))
+    {
+        LOGINFO(pwszError, hr);
+    }
 }
 
 #pragma endregion
