@@ -9,11 +9,6 @@
 namespace seafile
 {
 
-    enum CachedStatus {
-        NoCached = 0,
-        Cached,
-    };
-
     typedef std::string DISK_LETTER_TYPE;
 /**
  * Abstract base class for all one-way commands, e.g. don't require a response
@@ -110,7 +105,7 @@ protected:
 };
 
 // getFile Cached status
-class GetCachedStatusCommand : public AppletCommand <CachedStatus> {
+class GetCachedStatusCommand : public AppletCommand <bool> {
 
 public:
     GetCachedStatusCommand(const std::string& path);
@@ -120,7 +115,7 @@ protected:
     std::string serializeForDrive();
 
     bool parseDriveResponse(const std::string &raw_resp,
-                            CachedStatus *status);
+                            bool *status);
 
 private:
     std::string path_;

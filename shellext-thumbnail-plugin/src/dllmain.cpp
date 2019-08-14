@@ -47,7 +47,6 @@ long        g_cDllRef   = 0;
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-    LOGINFO(L"begin to load windows thumbnail plugin");
     switch (dwReason)
     {
     case DLL_PROCESS_ATTACH:

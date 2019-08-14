@@ -35,6 +35,7 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 #include <msxml6.h>
 
 #include <windows.h>
+#include <algorithm>
 
 #include "../ext-utils.h"
 #include "../commands.h"
@@ -112,7 +113,7 @@ IFACEMETHODIMP RecipeThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfM
     //}
     // init with a file path
 
-    LOGINFO(L"Initialize with file: %s", pfilePath);
+    LOGINFO(L"initialize with file: %s", pfilePath);
     return 1;
 }
 
@@ -132,37 +133,42 @@ IFACEMETHODIMP RecipeThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfM
 IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     WTS_ALPHATYPE *pdwAlpha)
 {
-    LOGINFO(L"GetThumbnail");
+    LOGINFO(L"get thumbnail");
 
-    // get cached status
-    seafile::GetCachedStatusCommand cmd(filepath_);
-    seafile::CachedStatus status;
-    if (cmd.sendAndWait(&status)) {
-        return seafile::NoCached;
-    }
+    // Get diskletter command
+    seafile::GetSeadriveMountLetter get_disk_letter_cmd;
+    seafile::DISK_LETTER_TYPE seadrive_mount_disk_letter;
 
-    seafile::GetSeadriveMountLetter letcmd;
-    seafile::DISK_LETTER_TYPE disk_letter;
+    if (!get_disk_letter_cmd.sendAndWait(&seadrive_mount_disk_letter)){
 
-    if (letcmd.sendAndWait(&disk_letter)){
-         disk_letter.clear();
+        LOGINFO(L"send get mount disk letter command failed");
+        seadrive_mount_disk_letter.clear();
     }
 
     std::string current_disk_letter = seafile::utils::getDiskLetterName(filepath_);
-    LOGINFO(L"current_disk_letter %s", seafile::utils::localeToWString(current_disk_letter));
+    transform(current_disk_letter.begin(), current_disk_letter.end(), current_disk_letter.begin(), ::tolower);
 
-    if (disk_letter == current_disk_letter) {
-        if (status == seafile::Cached) {
+    if (seadrive_mount_disk_letter == current_disk_letter) {
+        // Get cache status
+        seafile::GetCachedStatusCommand cmd(filepath_);
+        bool status;
+        if (!cmd.sendAndWait(&status)) {
+            LOGINFO(L"send get file cached status failed");
+        }
+
+        if (status) {
             // TODO: 文件已经缓存到了本地，直接加载已经缓存的文件
+            LOGINFO(L"the file have been cached");
         } else {
             // TODO: 文件未进行缓存，请求进行缩略图的请求
+            LOGINFO(L"the file have no been cached");
         }
 
     } else {
         LOGINFO(L"current dir is not in seadrive dir,\
-        current dir in diskletter is [%s], seadrive mount diskletter is [%s]",\
-        seafile::utils::localeToWString(current_disk_letter),\
-        seafile::utils::localeToWString(disk_letter)
+            current dir in diskletter is [%s], seadrive mount diskletter is [%s]",\
+            seafile::utils::localeToWString(current_disk_letter),\
+            seafile::utils::localeToWString(seadrive_mount_disk_letter)
         );
     }
 

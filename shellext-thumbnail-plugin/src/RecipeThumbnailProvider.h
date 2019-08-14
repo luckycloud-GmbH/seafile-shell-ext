@@ -68,13 +68,12 @@ private:
     long m_cRef;
 
     // Provided during initialization.
-    WCHAR *m_filePath;
     std::string filepath_;
 
     HRESULT ConvertBitmapSourceTo32bppHBITMAP(
-    IWICBitmapSource *pBitmapSource,
-    IWICImagingFactory *pImagingFactory,
-    HBITMAP *phbmp);
+        IWICBitmapSource *pBitmapSource,
+        IWICImagingFactory *pImagingFactory,
+        HBITMAP *phbmp);
 
     HRESULT WICCreate32bppHBITMAP(IStream *pstm, HBITMAP *phbmp,
                                   WTS_ALPHATYPE *pdwAlpha);

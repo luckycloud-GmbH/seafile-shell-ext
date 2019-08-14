@@ -8,7 +8,7 @@
 namespace seafile {
 
 GetCachedStatusCommand::GetCachedStatusCommand(const std::string &path)
-    : AppletCommand<CachedStatus>("get-cached-status"),
+    : AppletCommand<bool>("get-cached-status"),
     path_(path)
 {
 }
@@ -24,12 +24,12 @@ std::string GetCachedStatusCommand::serializeForDrive()
 }
 
 bool GetCachedStatusCommand::parseDriveResponse(const std::string& raw_resp,
-                                                CachedStatus *status)
+                                                bool *status)
 {
     if (raw_resp == "Cached") {
-        *status = Cached;
+        *status = true;
     } else {
-        *status = NoCached;
+        *status = false;
     }
     return true;
 }
