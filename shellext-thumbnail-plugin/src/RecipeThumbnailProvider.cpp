@@ -134,8 +134,6 @@ IFACEMETHODIMP RecipeThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfM
 IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     WTS_ALPHATYPE *pdwAlpha)
 {
-    LOGINFO(L"get thumbnail");
-
     // Get diskletter command
     seafile::GetSeadriveMountLetter get_disk_letter_cmd;
     seafile::DISK_LETTER_TYPE seadrive_mount_disk_letter;
@@ -158,14 +156,21 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         }
 
         if (status) {
-            // TODO: 文件已经缓存到了本地，直接加载已经缓存的文件
-            LOGINFO(L"the file have been cached");
+            LOGINFO(L"the file [%s] have been cached", seafile::utils::localeToWString(filepath_));
+            HBITMAP hbmap;
+            // GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), &hbmap);
+            //GetsHBITMAPFromFile(L"C:\\Users\\sun\\Downloads\\icon.bmp", &hbmap);
+            *phbmp = (HBITMAP)LoadImage(NULL, L"C:\\Users\\sun\\Downloads\\icon.bmp", IMAGE_BITMAP, 0, 0,LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
+
+            //*phbmp = hbmap;
         } else {
             // TODO: 文件未进行缓存，请求进行缩略图的请求
             LOGINFO(L"the file have no been cached");
         }
 
     } else {
+        
+        // TODO: use windows api generate thumbnail
         LOGINFO(L"current dir is not in seadrive dir,\
             current dir in diskletter is [%s], seadrive mount diskletter is [%s]",\
             seafile::utils::localeToWString(current_disk_letter),\
@@ -173,13 +178,7 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         );
     }
 
-    *phbmp = (HBITMAP)LoadImage( NULL, L"C:\\Users\\sun\\1.bmp", IMAGE_BITMAP, 0, 0,
-               LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
-
-    if( *phbmp == NULL )
-        return FALSE;
-
-    cx = 128;
+    cx = 64;
     return 1;
 }
 
@@ -188,149 +187,94 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 // TODO:
 #pragma region Helper Functions
 
-HRESULT RecipeThumbnailProvider::ConvertBitmapSourceTo32bppHBITMAP(
-    IWICBitmapSource *pBitmapSource, IWICImagingFactory *pImagingFactory,
-    HBITMAP *phbmp)
+//HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
+//{
+//    PCWSTR pwszError = NULL;
+//
+//    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+//    if (SUCCEEDED(hr)) {
+//        LOGINFO(L"get windows HBITMAP from file %s %s", pfilePath, __FUNCTIONW__);
+//        // Getting the IShellItemImageFactory interface pointer for the file.
+//        IShellItemImageFactory *pImageFactory;
+//        hr = SHCreateItemFromParsingName(pfilePath, NULL, IID_PPV_ARGS(&pImageFactory));
+//        if (SUCCEEDED(hr)) {
+//            SIZE size = {64, 64};
+//
+//            //sz - Size of the image, SIIGBF_BIGGERSIZEOK - GetImage will stretch down the bitmap (preserving aspect ratio)
+//            HBITMAP bmp;
+//            hr = pImageFactory->GetImage(size, SIIGBF_BIGGERSIZEOK|SIIGBF_SCALEUP, &bmp);
+//            if (SUCCEEDED(hr)) {
+//                LOGINFO(L"get HBITMAP successful");
+//                hbmap = &bmp;
+//                // DeleteObject(bmp);
+//            } else {
+//                LOGINFO(L"IShellItemImageFactory::GetImage failed with error code %x", hr);
+//            }
+//
+//            pImageFactory->Release();
+//        } else {
+//            LOGINFO(L"SHCreateItemFromParsingName failed with error %x",hr);
+//        }
+//
+//        CoUninitialize();
+//    } else {
+//        LOGINFO(L"CoInitializeEx failed with error code %x");
+//        return hr;
+//    }
+//
+//}
+
+HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
 {
-    *phbmp = NULL;
-
-    IWICBitmapSource *pBitmapSourceConverted = NULL;
-    WICPixelFormatGUID guidPixelFormatSource;
-    HRESULT hr = pBitmapSource->GetPixelFormat(&guidPixelFormatSource);
-
-    if (SUCCEEDED(hr) && (guidPixelFormatSource != GUID_WICPixelFormat32bppBGRA)) {
-        IWICFormatConverter *pFormatConverter;
-        hr = pImagingFactory->CreateFormatConverter(&pFormatConverter);
-        if (SUCCEEDED(hr)) {
-            // Create the appropriate pixel format converter.
-            hr = pFormatConverter->Initialize(pBitmapSource,
-                GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL,
-                0, WICBitmapPaletteTypeCustom);
-            if (SUCCEEDED(hr)) {
-                hr = pFormatConverter->QueryInterface(&pBitmapSourceConverted);
-            }
-            pFormatConverter->Release();
-        }
-    } else {
-        // No conversion is necessary.
-        hr = pBitmapSource->QueryInterface(&pBitmapSourceConverted);
-    }
-
+    
+    IShellItem* pShellItem = NULL;
+    HRESULT hr = SHCreateItemFromParsingName(
+        pfilePath,
+        NULL,
+        IID_PPV_ARGS(&pShellItem)
+    );
     if (SUCCEEDED(hr)) {
-        UINT nWidth, nHeight;
-        hr = pBitmapSourceConverted->GetSize(&nWidth, &nHeight);
-        if (SUCCEEDED(hr)) {
-            BITMAPINFO bmi = { sizeof(bmi.bmiHeader) };
-            bmi.bmiHeader.biWidth = nWidth;
-            bmi.bmiHeader.biHeight = -static_cast<LONG>(nHeight);
-            bmi.bmiHeader.biPlanes = 1;
-            bmi.bmiHeader.biBitCount = 32;
-            bmi.bmiHeader.biCompression = BI_RGB;
+        const UINT THUMB_SIZE = 256;
 
-            BYTE *pBits;
-            HBITMAP hbmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS,
-                reinterpret_cast<void **>(&pBits), NULL, 0);
-            hr = hbmp ? S_OK : E_OUTOFMEMORY;
-            if (SUCCEEDED(hr)) {
-                WICRect rect = {0, 0, nWidth, nHeight};
-
-                // Convert the pixels and store them in the HBITMAP.
-                // Note: the name of the function is a little misleading -
-                // we're not doing any extraneous copying here.  CopyPixels
-                // is actually converting the image into the given buffer.
-                hr = pBitmapSourceConverted->CopyPixels(&rect, nWidth * 4,
-                    nWidth * nHeight * 4, pBits);
-                if (SUCCEEDED(hr)) {
-                    *phbmp = hbmp;
-                } else {
-                    DeleteObject(hbmp);
-                }
-            }
-        }
-        pBitmapSourceConverted->Release();
-    }
-    return hr;
-}
-
-
-// TODO 如何从文件中读取数据， 然后对缩略图进行渲染
-HRESULT RecipeThumbnailProvider::WICCreate32bppHBITMAP(IStream *pstm,
-    HBITMAP *phbmp, WTS_ALPHATYPE *pdwAlpha)
-{
-    *phbmp = NULL;
-
-    // Create the COM imaging factory.
-    IWICImagingFactory *pImagingFactory;
-    HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, NULL,
-        CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pImagingFactory));
-    if (SUCCEEDED(hr)) {
-        // Create an appropriate decoder.
-        IWICBitmapDecoder *pDecoder;
-        hr = pImagingFactory->CreateDecoderFromStream(pstm,
-            &GUID_VendorMicrosoft, WICDecodeMetadataCacheOnDemand, &pDecoder);
-        if (SUCCEEDED(hr)) {
-            IWICBitmapFrameDecode *pBitmapFrameDecode;
-            hr = pDecoder->GetFrame(0, &pBitmapFrameDecode);
-            if (SUCCEEDED(hr)) {
-                hr = ConvertBitmapSourceTo32bppHBITMAP(pBitmapFrameDecode,
-                    pImagingFactory, phbmp);
-                if (SUCCEEDED(hr)) {
-                    *pdwAlpha = WTSAT_ARGB;
-                }
-                pBitmapFrameDecode->Release();
-            }
-            pDecoder->Release();
-        }
-        pImagingFactory->Release();
-    }
-    return hr;
-}
-
-HBITMAP * GetsHBITMAPFromFile(LPCWSTR pfilePath)
-{
-    PCWSTR pwszError = NULL;
-
-    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-    if (SUCCEEDED(hr))
-    {
-        // Getting the IShellItemImageFactory interface pointer for the file.
-        IShellItemImageFactory *pImageFactory;
-        hr = SHCreateItemFromParsingName(pfilePath, NULL, IID_PPV_ARGS(&pImageFactory));
+        IThumbnailCache* pThumbCache;
+        hr = CoCreateInstance(
+            CLSID_LocalThumbnailCache,
+            NULL,
+            CLSCTX_INPROC_SERVER,
+            IID_PPV_ARGS(&pThumbCache)
+        );
         if (SUCCEEDED(hr))
         {
-            SIZE size = {128, 128};
-
-            //sz - Size of the image, SIIGBF_BIGGERSIZEOK - GetImage will stretch down the bitmap (preserving aspect ratio)
-            HBITMAP hbmp;
-            hr = pImageFactory->GetImage(size, SIIGBF_BIGGERSIZEOK, &hbmp);
+            ISharedBitmap* pBitmap;
+            hr = pThumbCache->GetThumbnail(
+                pShellItem,
+                THUMB_SIZE,
+                WTS_SCALETOREQUESTEDSIZE|WTS_FORCEEXTRACTION,
+                &pBitmap,
+                NULL,
+                NULL
+            );
             if (SUCCEEDED(hr))
             {
-                return hbmp;
-                DeleteObject(hbmp);
+                HBITMAP hBitmap;
+                hr = pBitmap->GetSharedBitmap(
+                    &hBitmap
+                );
+                if (SUCCEEDED(hr))
+                {
+                    *hbmap = hBitmap;
+                    LOGINFO(L"get bitmap succeed");
+                }
+                pBitmap->Release();
             }
-            else
-            {
-                pwszError = L"IShellItemImageFactory::GetImage failed with error code %x";
-            }
 
-            pImageFactory->Release();
-        }
-        else
-        {
-            pwszError = L"SHCreateItemFromParsingName failed with error %x";
+            pThumbCache->Release();
         }
 
-        CoUninitialize();
-    }
-    else
-    {
-        pwszError = L"CoInitializeEx failed with error code %x";
+    } else {
+        LOGINFO(L"creator item from parsiing name failed");
     }
 
-    if (FAILED(hr))
-    {
-        LOGINFO(pwszError, hr);
-    }
+    return hr;
 }
-
 #pragma endregion

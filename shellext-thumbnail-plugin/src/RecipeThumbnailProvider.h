@@ -70,12 +70,5 @@ private:
     // Provided during initialization.
     std::string filepath_;
 
-    HRESULT ConvertBitmapSourceTo32bppHBITMAP(
-        IWICBitmapSource *pBitmapSource,
-        IWICImagingFactory *pImagingFactory,
-        HBITMAP *phbmp);
-
-    HRESULT WICCreate32bppHBITMAP(IStream *pstm, HBITMAP *phbmp,
-                                  WTS_ALPHATYPE *pdwAlpha);
-    HBITMAP * GetsHBITMAPFromFile(LPCWSTR pfilePath);
+    HRESULT GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP *hbmap);
 };
