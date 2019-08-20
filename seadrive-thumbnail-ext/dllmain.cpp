@@ -117,7 +117,7 @@ STDAPI DllCanUnloadNow(void)
 //
 STDAPI DllRegisterServer(void)
 {
-    LOGINFO(L"register dll server");
+    seaf_ext_log("register dll server");
     HRESULT hr;
 
     wchar_t szModule[MAX_PATH];
@@ -165,7 +165,7 @@ STDAPI DllRegisterServer(void)
 //
 STDAPI DllUnregisterServer(void)
 {
-    LOGINFO(L"dll unregister server");
+    seaf_ext_log("dll unregister server");
     HRESULT hr = S_OK;
 
     wchar_t szModule[MAX_PATH];

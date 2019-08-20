@@ -37,7 +37,6 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 #include <thumbcache.h>     // For IThumbnailProvider
 #include <wincodec.h>       // Windows Imaging Codecs
 
-#include "log.h"
 
 #pragma comment(lib, "windowscodecs.lib")
 

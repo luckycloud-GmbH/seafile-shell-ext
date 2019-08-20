@@ -38,10 +38,11 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 #include <windows.h>
 #include <algorithm>
 
-#include "../ext-utils.h"
-#include "../commands.h"
-// depend extension tool file
+#include "ext-utils.h"
+#include "commands.h"
+#include "log.h"
 
+// depend extension tool file
 
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Crypt32.lib")
@@ -106,15 +107,8 @@ IFACEMETHODIMP RecipeThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfM
 {
     // A handler instance should be initialized only once in its lifetime.
     HRESULT hr = HRESULT_FROM_WIN32(ERROR_ALREADY_INITIALIZED);
-    filepath_ = seafile::utils::wStringToLocale(pfilePath);
-    //if (m_pStream == NULL)
-    //{
-    //    // Take a reference to the stream if it has not been initialized yet.
-    //    hr = pStream->QueryInterface(&m_pStream);
-    //}
-    // init with a file path
-
-    LOGINFO(L"initialize with file: %s", pfilePath);
+    filepath_ = seafile::utils::wStringToUtf8(pfilePath);
+    seaf_ext_log("initialize with file: %s", filepath_.c_str());
     return 1;
 }
 
@@ -140,7 +134,7 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
     if (!get_disk_letter_cmd.sendAndWait(&seadrive_mount_disk_letter)){
 
-        LOGINFO(L"send get mount disk letter command failed");
+        seaf_ext_log("send get mount disk letter command failed");
         seadrive_mount_disk_letter.clear();
     }
 
@@ -152,11 +146,11 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         seafile::GetCachedStatusCommand cmd(filepath_);
         bool status;
         if (!cmd.sendAndWait(&status)) {
-            LOGINFO(L"send get file cached status failed");
+            seaf_ext_log("send get file cached status failed");
         }
 
         if (status) {
-            LOGINFO(L"the file [%s] have been cached", seafile::utils::localeToWString(filepath_));
+            seaf_ext_log("the file [%s] have been cached", filepath_.c_str());
             HBITMAP hbmap;
             // GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), &hbmap);
             //GetsHBITMAPFromFile(L"C:\\Users\\sun\\Downloads\\icon.bmp", &hbmap);
@@ -165,16 +159,16 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
             //*phbmp = hbmap;
         } else {
             // TODO: 文件未进行缓存，请求进行缩略图的请求
-            LOGINFO(L"the file have no been cached");
+            seaf_ext_log("the file have no been cached");
         }
 
     } else {
         
         // TODO: use windows api generate thumbnail
-        LOGINFO(L"current dir is not in seadrive dir,\
+        seaf_ext_log("current dir is not in seadrive dir,\
             current dir in diskletter is [%s], seadrive mount diskletter is [%s]",\
-            seafile::utils::localeToWString(current_disk_letter),\
-            seafile::utils::localeToWString(seadrive_mount_disk_letter)
+            current_disk_letter.c_str(),\
+            seadrive_mount_disk_letter.c_str()
         );
     }
 
@@ -186,43 +180,6 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
 // TODO:
 #pragma region Helper Functions
-
-//HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
-//{
-//    PCWSTR pwszError = NULL;
-//
-//    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-//    if (SUCCEEDED(hr)) {
-//        LOGINFO(L"get windows HBITMAP from file %s %s", pfilePath, __FUNCTIONW__);
-//        // Getting the IShellItemImageFactory interface pointer for the file.
-//        IShellItemImageFactory *pImageFactory;
-//        hr = SHCreateItemFromParsingName(pfilePath, NULL, IID_PPV_ARGS(&pImageFactory));
-//        if (SUCCEEDED(hr)) {
-//            SIZE size = {64, 64};
-//
-//            //sz - Size of the image, SIIGBF_BIGGERSIZEOK - GetImage will stretch down the bitmap (preserving aspect ratio)
-//            HBITMAP bmp;
-//            hr = pImageFactory->GetImage(size, SIIGBF_BIGGERSIZEOK|SIIGBF_SCALEUP, &bmp);
-//            if (SUCCEEDED(hr)) {
-//                LOGINFO(L"get HBITMAP successful");
-//                hbmap = &bmp;
-//                // DeleteObject(bmp);
-//            } else {
-//                LOGINFO(L"IShellItemImageFactory::GetImage failed with error code %x", hr);
-//            }
-//
-//            pImageFactory->Release();
-//        } else {
-//            LOGINFO(L"SHCreateItemFromParsingName failed with error %x",hr);
-//        }
-//
-//        CoUninitialize();
-//    } else {
-//        LOGINFO(L"CoInitializeEx failed with error code %x");
-//        return hr;
-//    }
-//
-//}
 
 HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
 {
@@ -243,8 +200,7 @@ HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP*
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&pThumbCache)
         );
-        if (SUCCEEDED(hr))
-        {
+        if (SUCCEEDED(hr)) {
             ISharedBitmap* pBitmap;
             hr = pThumbCache->GetThumbnail(
                 pShellItem,
@@ -254,16 +210,14 @@ HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP*
                 NULL,
                 NULL
             );
-            if (SUCCEEDED(hr))
-            {
+            if (SUCCEEDED(hr)) {
                 HBITMAP hBitmap;
                 hr = pBitmap->GetSharedBitmap(
                     &hBitmap
                 );
-                if (SUCCEEDED(hr))
-                {
+                if (SUCCEEDED(hr)) {
                     *hbmap = hBitmap;
-                    LOGINFO(L"get bitmap succeed");
+                    seaf_ext_log("get bitmap succeed");
                 }
                 pBitmap->Release();
             }
@@ -272,7 +226,7 @@ HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP*
         }
 
     } else {
-        LOGINFO(L"creator item from parsiing name failed");
+        seaf_ext_log("creator item from parsiing name failed");
     }
 
     return hr;

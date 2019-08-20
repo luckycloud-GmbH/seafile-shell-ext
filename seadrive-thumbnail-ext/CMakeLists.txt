@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6)
-PROJECT(WindowsThumbnail CXX)
+PROJECT(seadrive_thumbnail_ext CXX)
 
 ################################################################################
 # Compiler and linker options
@@ -11,16 +11,10 @@ SET(CMAKE_CXX_STANDARD 11)
 
 ################################################################################
 # Sources and libraries
-FILE(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-FILE(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
+FILE(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+FILE(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-SET(ext_sources
-    applet-connection.cpp
-    commands.cpp
-    ext-utils.cpp
-)
-
-SET(DEFS ${CMAKE_CURRENT_SOURCE_DIR}/src/ExportFunctions.def)
+SET(DEFS ${CMAKE_CURRENT_SOURCE_DIR}/ExportFunctions.def)
 ################################################################################
 # Compile target
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES} ${DEFS} ${ext_sources})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES} ${DEFS})
