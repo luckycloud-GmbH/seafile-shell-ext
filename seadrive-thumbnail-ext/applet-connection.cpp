@@ -9,7 +9,7 @@
 namespace {
 
 const char *kSeafExtPipeNameApplet = "\\\\.\\pipe\\seafile_ext_pipe_";
-const char *kSeafExtPipeNameDrive = "\\\\.\\pipe\\seadrive_ext_windows_thumbnail_pipe_";
+const char *kSeafExtPipeNameDrive = "\\\\.\\pipe\\seadrive_ext_pipe_";
 
 struct ThreadData {
     seafile::AppletConnection *conn;
