@@ -36,10 +36,11 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 #include <windows.h>
 #include <thumbcache.h>     // For IThumbnailProvider
 #include <wincodec.h>       // Windows Imaging Codecs
+#include <GdiPlus.h>
 
 
 #pragma comment(lib, "windowscodecs.lib")
-
+#pragma comment(lib, "Gdiplus.lib")
 
 class RecipeThumbnailProvider :
     public IInitializeWithFile,
@@ -68,6 +69,9 @@ private:
 
     // Provided during initialization.
     std::string filepath_;
+    Gdiplus::Bitmap* hbitmap_;
 
-    HRESULT GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP *hbmap);
+    void GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP *hbmap);
+    void freeBitmapResource();
 };
+

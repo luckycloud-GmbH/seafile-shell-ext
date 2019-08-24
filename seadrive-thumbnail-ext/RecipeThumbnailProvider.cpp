@@ -151,12 +151,9 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
         if (status) {
             seaf_ext_log("the file [%s] have been cached", filepath_.c_str());
-            HBITMAP hbmap;
-            // GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), &hbmap);
-            //GetsHBITMAPFromFile(L"C:\\Users\\sun\\Downloads\\icon.bmp", &hbmap);
-            *phbmp = (HBITMAP)LoadImage(NULL, L"C:\\Users\\sun\\Downloads\\icon.bmp", IMAGE_BITMAP, 0, 0,LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 
-            //*phbmp = hbmap;
+             GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
+             freeBitmapResource();
         } else {
             // TODO: 文件未进行缓存，请求进行缩略图的请求
             seaf_ext_log("the file have no been cached");
@@ -164,7 +161,8 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
     } else {
         
-        // TODO: use windows api generate thumbnail
+        GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
+        freeBitmapResource();
         seaf_ext_log("current dir is not in seadrive dir,\
             current dir in diskletter is [%s], seadrive mount diskletter is [%s]",\
             current_disk_letter.c_str(),\
@@ -178,57 +176,32 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
 #pragma endregion
 
-// TODO:
 #pragma region Helper Functions
 
-HRESULT RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
+void RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
 {
-    
-    IShellItem* pShellItem = NULL;
-    HRESULT hr = SHCreateItemFromParsingName(
-        pfilePath,
-        NULL,
-        IID_PPV_ARGS(&pShellItem)
-    );
-    if (SUCCEEDED(hr)) {
-        const UINT THUMB_SIZE = 256;
+    hbitmap_ = Gdiplus::Bitmap::FromFile(pfilePath);
+    if (hbitmap_ == NULL) {
+        seaf_ext_log("load bitmap from file failed");
+        return;
+    }
+    Gdiplus::Status status = hbitmap_->GetHBITMAP(NULL, hbmap);
 
-        IThumbnailCache* pThumbCache;
-        hr = CoCreateInstance(
-            CLSID_LocalThumbnailCache,
-            NULL,
-            CLSCTX_INPROC_SERVER,
-            IID_PPV_ARGS(&pThumbCache)
-        );
-        if (SUCCEEDED(hr)) {
-            ISharedBitmap* pBitmap;
-            hr = pThumbCache->GetThumbnail(
-                pShellItem,
-                THUMB_SIZE,
-                WTS_SCALETOREQUESTEDSIZE|WTS_FORCEEXTRACTION,
-                &pBitmap,
-                NULL,
-                NULL
-            );
-            if (SUCCEEDED(hr)) {
-                HBITMAP hBitmap;
-                hr = pBitmap->GetSharedBitmap(
-                    &hBitmap
-                );
-                if (SUCCEEDED(hr)) {
-                    *hbmap = hBitmap;
-                    seaf_ext_log("get bitmap succeed");
-                }
-                pBitmap->Release();
-            }
-
-            pThumbCache->Release();
-        }
-
-    } else {
-        seaf_ext_log("creator item from parsiing name failed");
+    if (status != Gdiplus::Ok) {
+        seaf_ext_log("get hbitmap failed");
     }
 
-    return hr;
+    return;
 }
+
+void RecipeThumbnailProvider::freeBitmapResource() {
+
+    if (hbitmap_) {
+        delete hbitmap_;
+        hbitmap_ = NULL;
+    }
+    return;
+}
+
 #pragma endregion
+

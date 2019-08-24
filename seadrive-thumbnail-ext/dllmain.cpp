@@ -29,10 +29,14 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 #include <windows.h>
 #include <Guiddef.h>
+#include <vector>
+#include <string>
+
 #include <shlobj.h>                 // For SHChangeNotify
 #include "ClassFactory.h"           // For the class factory
 #include "Reg.h"
 #include "log.h"
+#include "ext-utils.h"
 
 // {4D2FBA8D-621B-4447-AF6D-5794F479C4A5}
 // When you write your own handler, you must create a new CLSID by using the
@@ -40,6 +44,8 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 const CLSID CLSID_RecipeThumbnailProvider =
 { 0x4D2FBA8D, 0x621B, 0x4447, { 0xAF, 0x6D, 0x57, 0x94, 0xF4, 0x79, 0xC4, 0xA5 } };
 
+// Customization Thumbnail file type list.
+std::vector<std::wstring> imageformatlist = {L"png", L"jpeg", L"jpg"};
 
 HINSTANCE   g_hInst     = NULL;
 long        g_cDllRef   = 0;
@@ -135,15 +141,13 @@ STDAPI DllRegisterServer(void)
     {
         // Register the thumbnail handler. The thumbnail handler is associated
         // with the .recipe file class.
-        hr = RegisterShellExtThumbnailHandler(L"insv",
-            CLSID_RecipeThumbnailProvider);
 
-        // Registry jpeg format
-        hr = RegisterShellExtThumbnailHandler(L"jpeg",
-            CLSID_RecipeThumbnailProvider);
-
-        hr = RegisterShellExtThumbnailHandler(L"jpg",
-            CLSID_RecipeThumbnailProvider);
+        for (std::wstring imageformat : imageformatlist) {
+            hr = RegisterShellExtThumbnailHandler(imageformat.c_str(), CLSID_RecipeThumbnailProvider);
+            if (FAILED(hr)) {
+                seaf_ext_log("unable to register the file format is %s", seafile::utils::wStringToUtf8(imageformat.c_str()).c_str());
+            }
+        }
 
         if (SUCCEEDED(hr))
         {
@@ -180,10 +184,12 @@ STDAPI DllUnregisterServer(void)
     if (SUCCEEDED(hr))
     {
         // Unregister the thumbnail handler.
-        hr = UnregisterShellExtThumbnailHandler(L"insv");
-        hr = UnregisterShellExtThumbnailHandler(L"jpeg");
-        hr = UnregisterShellExtThumbnailHandler(L"jpg");
-
+        for (std::wstring imageformat : imageformatlist) {
+            hr = UnregisterShellExtThumbnailHandler(imageformat.c_str());
+            if (FAILED(hr)) {
+                seaf_ext_log("unable to unregister the file format is %s", seafile::utils::wStringToUtf8(imageformat.c_str()).c_str());
+            }
+        }
     }
 
     return hr;
