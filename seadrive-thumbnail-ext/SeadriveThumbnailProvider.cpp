@@ -1,5 +1,5 @@
 /******************************** Module Header ********************************\
-Module Name:  RecipeThumbnailProvider.cpp
+Module Name:  SeadriveThumbnailProvider.cpp
 Project:      CppShellExtThumbnailHandler
 Copyright (c) Microsoft Corporation.
 
@@ -29,7 +29,7 @@ EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 \*******************************************************************************/
 
-#include "RecipeThumbnailProvider.h"
+#include "SeadriveThumbnailProvider.h"
 #include <Shlwapi.h>
 #include <Wincrypt.h>   // For CryptStringToBinary.
 #include <msxml6.h>
@@ -54,13 +54,13 @@ extern HINSTANCE g_hInst;
 extern long g_cDllRef;
 
 
-RecipeThumbnailProvider::RecipeThumbnailProvider() : m_cRef(1)
+SeadriveThumbnailProvider::SeadriveThumbnailProvider() : m_cRef(1)
 {
     InterlockedIncrement(&g_cDllRef);
 }
 
 
-RecipeThumbnailProvider::~RecipeThumbnailProvider()
+SeadriveThumbnailProvider::~SeadriveThumbnailProvider()
 {
     InterlockedDecrement(&g_cDllRef);
 }
@@ -69,25 +69,25 @@ RecipeThumbnailProvider::~RecipeThumbnailProvider()
 #pragma region IUnknown
 
 // Query to the interface the component supported.
-IFACEMETHODIMP RecipeThumbnailProvider::QueryInterface(REFIID riid, void **ppv)
+IFACEMETHODIMP SeadriveThumbnailProvider::QueryInterface(REFIID riid, void **ppv)
 {
     static const QITAB qit[] =
     {
-        QITABENT(RecipeThumbnailProvider, IThumbnailProvider),
-        QITABENT(RecipeThumbnailProvider, IInitializeWithFile),
+        QITABENT(SeadriveThumbnailProvider, IThumbnailProvider),
+        QITABENT(SeadriveThumbnailProvider, IInitializeWithFile),
         { 0 },
     };
     return QISearch(this, qit, riid, ppv);
 }
 
 // Increase the reference count for an interface on an object.
-IFACEMETHODIMP_(ULONG) RecipeThumbnailProvider::AddRef()
+IFACEMETHODIMP_(ULONG) SeadriveThumbnailProvider::AddRef()
 {
     return InterlockedIncrement(&m_cRef);
 }
 
 // Decrease the reference count for an interface on an object.
-IFACEMETHODIMP_(ULONG) RecipeThumbnailProvider::Release()
+IFACEMETHODIMP_(ULONG) SeadriveThumbnailProvider::Release()
 {
     ULONG cRef = InterlockedDecrement(&m_cRef);
     if (0 == cRef) {
@@ -103,7 +103,7 @@ IFACEMETHODIMP_(ULONG) RecipeThumbnailProvider::Release()
 #pragma region IInitializeWithFile
 
 // Initializes the thumbnail handler with a file path
-IFACEMETHODIMP RecipeThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfMode)
+IFACEMETHODIMP SeadriveThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfMode)
 {
     // A handler instance should be initialized only once in its lifetime.
     HRESULT hr = HRESULT_FROM_WIN32(ERROR_ALREADY_INITIALIZED);
@@ -125,7 +125,7 @@ IFACEMETHODIMP RecipeThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD grfM
 // GetThumbnail provides a handle to the retrieved image. It also provides a
 // value that indicates the color format of the image and whether it has
 // valid alpha information.
-IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
+IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     WTS_ALPHATYPE *pdwAlpha)
 {
     // Get diskletter command
@@ -178,7 +178,7 @@ IFACEMETHODIMP RecipeThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
 #pragma region Helper Functions
 
-void RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
+void SeadriveThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
 {
     hbitmap_ = Gdiplus::Bitmap::FromFile(pfilePath);
     if (hbitmap_ == NULL) {
@@ -194,7 +194,7 @@ void RecipeThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hb
     return;
 }
 
-void RecipeThumbnailProvider::freeBitmapResource() {
+void SeadriveThumbnailProvider::freeBitmapResource() {
 
     if (hbitmap_) {
         delete hbitmap_;

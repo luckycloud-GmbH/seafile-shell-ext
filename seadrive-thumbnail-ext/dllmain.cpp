@@ -41,7 +41,7 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 // {4D2FBA8D-621B-4447-AF6D-5794F479C4A5}
 // When you write your own handler, you must create a new CLSID by using the
 // "Create GUID" tool in the Tools menu, and specify the CLSID value here.
-const CLSID CLSID_RecipeThumbnailProvider =
+const CLSID CLSID_SeadriveThumbnailProvider =
 { 0x4D2FBA8D, 0x621B, 0x4447, { 0xAF, 0x6D, 0x57, 0x94, 0xF4, 0x79, 0xC4, 0xA5 } };
 
 // Customization Thumbnail file type list.
@@ -87,7 +87,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv)
 {
     HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
-    if (IsEqualCLSID(CLSID_RecipeThumbnailProvider, rclsid))
+    if (IsEqualCLSID(CLSID_SeadriveThumbnailProvider, rclsid))
     {
         hr = E_OUTOFMEMORY;
         ClassFactory *pClassFactory = new ClassFactory();
@@ -134,8 +134,8 @@ STDAPI DllRegisterServer(void)
     }
 
     // Register the component.
-    hr = RegisterInprocServer(szModule, CLSID_RecipeThumbnailProvider,
-        L"CppShellExtThumbnailHandler.RecipeThumbnailProvider Class",
+    hr = RegisterInprocServer(szModule, CLSID_SeadriveThumbnailProvider,
+        L"CppShellExtThumbnailHandler.SeadriveThumbnailProvider Class",
         L"Apartment");
     if (SUCCEEDED(hr))
     {
@@ -143,7 +143,7 @@ STDAPI DllRegisterServer(void)
         // with the .recipe file class.
 
         for (std::wstring imageformat : imageformatlist) {
-            hr = RegisterShellExtThumbnailHandler(imageformat.c_str(), CLSID_RecipeThumbnailProvider);
+            hr = RegisterShellExtThumbnailHandler(imageformat.c_str(), CLSID_SeadriveThumbnailProvider);
             if (FAILED(hr)) {
                 seaf_ext_log("unable to register the file format is %s", seafile::utils::wStringToUtf8(imageformat.c_str()).c_str());
             }
@@ -180,7 +180,7 @@ STDAPI DllUnregisterServer(void)
     }
 
     // Unregister the component.
-    hr = UnregisterInprocServer(CLSID_RecipeThumbnailProvider);
+    hr = UnregisterInprocServer(CLSID_SeadriveThumbnailProvider);
     if (SUCCEEDED(hr))
     {
         // Unregister the thumbnail handler.

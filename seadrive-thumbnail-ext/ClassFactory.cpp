@@ -3,7 +3,7 @@ Module Name:  ClassFactory.cpp
 Project:      CppShellExtThumbnailHandler
 Copyright (c) Microsoft Corporation.
 
-The file implements the class factory for the RecipeThumbnailProvider COM class.
+The file implements the class factory for the SeadriveThumbnailProvider COM class.
 
 This source is subject to the Microsoft Public License.
 See http://www.microsoft.com/opensource/licenses.mspx#Ms-PL.
@@ -15,7 +15,7 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 \***************************************************************************/
 
 #include "ClassFactory.h"
-#include "RecipeThumbnailProvider.h"
+#include "SeadriveThumbnailProvider.h"
 #include <new>
 #include <Shlwapi.h>
 #pragma comment(lib, "shlwapi.lib")
@@ -77,7 +77,7 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
         hr = E_OUTOFMEMORY;
 
         // Create the COM component.
-        RecipeThumbnailProvider *pExt = new (std::nothrow) RecipeThumbnailProvider();
+        SeadriveThumbnailProvider *pExt = new (std::nothrow) SeadriveThumbnailProvider();
         if (pExt) {
             // Query the specified interface.
             hr = pExt->QueryInterface(riid, ppv);

@@ -1,5 +1,5 @@
 /****************************** Module Header ******************************\
-Module Name:  RecipeThumbnailProvider.h
+Module Name:  SeadriveThumbnailProvider.h
 Project:      CppShellExtThumbnailHandler
 Copyright (c) Microsoft Corporation.
 
@@ -42,7 +42,7 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "Gdiplus.lib")
 
-class RecipeThumbnailProvider :
+class SeadriveThumbnailProvider :
     public IInitializeWithFile,
     public IThumbnailProvider
 {
@@ -58,10 +58,10 @@ public:
     // IThumbnailProvider
     IFACEMETHODIMP GetThumbnail(UINT cx, HBITMAP *phbmp, WTS_ALPHATYPE *pdwAlpha);
 
-    RecipeThumbnailProvider();
+    SeadriveThumbnailProvider();
 
 protected:
-    ~RecipeThumbnailProvider();
+    ~SeadriveThumbnailProvider();
 
 private:
     // Reference count of component.

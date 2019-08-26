@@ -3,7 +3,7 @@ Module Name:  ClassFactory.h
 Project:      CppShellExtThumbnailHandler
 Copyright (c) Microsoft Corporation.
 
-The file declares the class factory for the RecipeThumbnailProvider COM class.
+The file declares the class factory for the SeadriveThumbnailProvider COM class.
 
 This source is subject to the Microsoft Public License.
 See http://www.microsoft.com/opensource/licenses.mspx#Ms-PL.
