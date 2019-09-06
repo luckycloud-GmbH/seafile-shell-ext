@@ -135,7 +135,6 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     if (!get_disk_letter_cmd.sendAndWait(&seadrive_mount_disk_letter)){
 
         seaf_ext_log("send get mount disk letter command failed");
-        seadrive_mount_disk_letter.clear();
         return -1;
     }
 
@@ -157,10 +156,12 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
             GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
             freeBitmapResource();
         } else {
-            // TODO: 文件未进行缓存，请求进行缩略图的请求
             std::string cached_thumbnail_path;
             seafile::GetThumbnailFromServer get_thumbnail_cmd(filepath_);
-            get_thumbnail_cmd.sendAndWait(&cached_thumbnail_path);
+            if (get_thumbnail_cmd.sendAndWait(&cached_thumbnail_path)) {
+                seaf_ext_log("send get thumbnail commmand failed");
+                return -1;
+            }
 
             if (cached_thumbnail_path.empty() || cached_thumbnail_path == "Failed") {
                 seaf_ext_log("thumbnail [%s] path is invaild", cached_thumbnail_path);
@@ -184,7 +185,7 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     }
 
     cx = 64;
-    return 1;
+    return 0;
 }
 
 #pragma endregion
