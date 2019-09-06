@@ -136,6 +136,7 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
         seaf_ext_log("send get mount disk letter command failed");
         seadrive_mount_disk_letter.clear();
+        return -1;
     }
 
     std::string current_disk_letter = seafile::utils::getDiskLetterName(filepath_);
@@ -147,16 +148,28 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         bool status;
         if (!cmd.sendAndWait(&status)) {
             seaf_ext_log("send get file cached status failed");
+            return -1;
         }
 
         if (status) {
             seaf_ext_log("the file [%s] have been cached", filepath_.c_str());
 
-             GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
-             freeBitmapResource();
+            GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
+            freeBitmapResource();
         } else {
             // TODO: 文件未进行缓存，请求进行缩略图的请求
+            std::string cached_thumbnail_path;
+            seafile::GetThumbnailFromServer get_thumbnail_cmd(filepath_);
+            get_thumbnail_cmd.sendAndWait(&cached_thumbnail_path);
+
+            if (cached_thumbnail_path.empty() || cached_thumbnail_path == "Failed") {
+                seaf_ext_log("thumbnail [%s] path is invaild", cached_thumbnail_path);
+                return  -1;
+            }
+            GetsHBITMAPFromFile(seafile::utils::localeToWString(cached_thumbnail_path), phbmp);
+            freeBitmapResource();
             seaf_ext_log("the file have no been cached");
+
         }
 
     } else {

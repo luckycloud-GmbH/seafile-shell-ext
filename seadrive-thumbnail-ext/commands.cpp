@@ -61,4 +61,29 @@ bool GetSeadriveMountLetter::parseDriveResponse(const std::string &raw_resp,
     return true;
 }
 
+
+// Get thumbnail from server command
+GetThumbnailFromServer::GetThumbnailFromServer(const std::string &path)
+    : AppletCommand <std::string>("get-thumbnail-from-server"),
+     path_(path)
+{
+}
+
+std::string GetThumbnailFromServer::serialize() {
+    return path_;
+}
+
+std::string GetThumbnailFromServer::serializeForDrive() {
+    return serialize();
+}
+
+bool GetThumbnailFromServer::parseDriveResponse(const std::string &raw_resp, std::string *cached_thumbnail_path) {
+    if(raw_resp.empty()) {
+        return false;
+    } else {
+        *cached_thumbnail_path = raw_resp;
+    }
+    return true;
+}
+
 } // namespace seafile

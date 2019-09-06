@@ -108,7 +108,7 @@ protected:
 class GetCachedStatusCommand : public AppletCommand <bool> {
 
 public:
-    GetCachedStatusCommand(const std::string& path);
+    GetCachedStatusCommand(const std::string &path);
 
 protected:
     std::string serialize();
@@ -130,6 +130,19 @@ protected:
     std::string serializeForDrive();
     bool parseDriveResponse(const std::string& raw_resp,
         DISK_LETTER_TYPE* letter);
+};
+
+// GetThumbnail from server
+class GetThumbnailFromServer : public AppletCommand <std::string> {
+public:
+    GetThumbnailFromServer(const std::string &path);
+protected:
+    std::string serialize();
+    std::string serializeForDrive();
+    bool parseDriveResponse(const std::string &raw_resp, std::string *cached_thumbnail_path);
+
+private:
+    std::string path_;
 };
 
 } // namespace seafile
