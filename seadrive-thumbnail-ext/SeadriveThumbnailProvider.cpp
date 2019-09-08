@@ -135,40 +135,35 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     if (!get_disk_letter_cmd.sendAndWait(&seadrive_mount_disk_letter)){
 
         seaf_ext_log("send get mount disk letter command failed");
-        return -1;
     }
 
     std::string current_disk_letter = seafile::utils::getDiskLetterName(filepath_);
-    transform(current_disk_letter.begin(), current_disk_letter.end(), current_disk_letter.begin(), ::tolower);
 
     if (seadrive_mount_disk_letter == current_disk_letter) {
-        // Get cache status
-        seafile::GetCachedStatusCommand cmd(filepath_);
+        // Get file cache status
+        seafile::GetCachedStatusCommand get_file_cached_status_cmd(filepath_);
         bool status;
-        if (!cmd.sendAndWait(&status)) {
+        if (!get_file_cached_status_cmd.sendAndWait(&status)) {
             seaf_ext_log("send get file cached status failed");
-            return -1;
         }
 
         if (status) {
             seaf_ext_log("the file [%s] have been cached", filepath_.c_str());
 
             GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
-            freeBitmapResource();
         } else {
             std::string cached_thumbnail_path;
             seafile::GetThumbnailFromServer get_thumbnail_cmd(filepath_);
             if (get_thumbnail_cmd.sendAndWait(&cached_thumbnail_path)) {
                 seaf_ext_log("send get thumbnail commmand failed");
-                return -1;
             }
 
             if (cached_thumbnail_path.empty() || cached_thumbnail_path == "Failed") {
+                GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
                 seaf_ext_log("thumbnail [%s] path is invaild", cached_thumbnail_path);
-                return  -1;
+            } else {
+                GetsHBITMAPFromFile(seafile::utils::localeToWString(cached_thumbnail_path), phbmp);
             }
-            GetsHBITMAPFromFile(seafile::utils::localeToWString(cached_thumbnail_path), phbmp);
-            freeBitmapResource();
             seaf_ext_log("the file have no been cached");
 
         }
@@ -176,9 +171,8 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     } else {
         
         GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
-        freeBitmapResource();
-        seaf_ext_log("current dir is not in seadrive dir,\
-            current dir in diskletter is [%s], seadrive mount diskletter is [%s]",\
+        seaf_ext_log("current dir is not in seadrive dir, current dir in diskletter is [%s],\
+            seadrive mount diskletter is [%s]",\
             current_disk_letter.c_str(),\
             seadrive_mount_disk_letter.c_str()
         );
@@ -204,7 +198,7 @@ void SeadriveThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* 
     if (status != Gdiplus::Ok) {
         seaf_ext_log("get hbitmap failed");
     }
-
+    freeBitmapResource();
     return;
 }
 

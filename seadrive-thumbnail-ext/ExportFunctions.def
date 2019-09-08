@@ -1,4 +1,4 @@
-LIBRARY	"CppShellExtThumbnailHandler"
+LIBRARY	"seadrive_thumbnail_ext"
 EXPORTS
     DllGetClassObject   PRIVATE
     DllCanUnloadNow     PRIVATE

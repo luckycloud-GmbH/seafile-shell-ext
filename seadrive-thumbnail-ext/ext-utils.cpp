@@ -20,7 +20,7 @@
 
 namespace {
 
-const int kPipeWaitTimeMSec = 1000;
+const int kPipeWaitTimeMSec = 5000;
 
 class OverLappedWrapper
 {
@@ -388,7 +388,9 @@ std::string getDiskLetterName(const std::string& path)
 
     if (pos == 0)
         return "/";
-    return p.substr(0, pos);
+	std::string disk_letter = p.substr(0, pos);
+	transform(disk_letter.begin(), disk_letter.end(), disk_letter.begin(), ::tolower);
+    return disk_letter;
 }
 
 std::string getBaseName(const std::string& path)
