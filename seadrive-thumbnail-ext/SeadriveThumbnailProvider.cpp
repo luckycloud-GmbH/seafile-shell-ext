@@ -107,7 +107,10 @@ IFACEMETHODIMP SeadriveThumbnailProvider::Initialize(LPCWSTR pfilePath, DWORD gr
 {
     // A handler instance should be initialized only once in its lifetime.
     HRESULT hr = HRESULT_FROM_WIN32(ERROR_ALREADY_INITIALIZED);
-    filepath_ = seafile::utils::wStringToUtf8(pfilePath);
+    std::string file_path = seafile::utils::wStringToUtf8(pfilePath);
+
+    // replace the file path character "\" to "/"
+    filepath_ = seafile::utils::normalizedPath(file_path);
     seaf_ext_log("initialize with file: %s", filepath_.c_str());
     return 1;
 }
@@ -150,7 +153,7 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         if (status) {
             seaf_ext_log("the file [%s] have been cached", filepath_.c_str());
 
-            GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
+            GetsHBITMAPFromFile(seafile::utils::utf8ToWString(filepath_), phbmp);
         } else {
             std::string cached_thumbnail_path;
             seafile::GetThumbnailFromServer get_thumbnail_cmd(filepath_);
@@ -159,18 +162,18 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
             }
 
             if (cached_thumbnail_path.empty() || cached_thumbnail_path == "Failed") {
-                GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
+                GetsHBITMAPFromFile(seafile::utils::utf8ToWString(filepath_), phbmp);
                 seaf_ext_log("thumbnail [%s] path is invaild", cached_thumbnail_path);
             } else {
-                GetsHBITMAPFromFile(seafile::utils::localeToWString(cached_thumbnail_path), phbmp);
+                GetsHBITMAPFromFile(seafile::utils::utf8ToWString(cached_thumbnail_path), phbmp);
             }
             seaf_ext_log("the file have no been cached");
 
         }
 
-    } else {
-        
-        GetsHBITMAPFromFile(seafile::utils::localeToWString(filepath_), phbmp);
+    } else { // the path of register file type not in seadrive dir
+
+        GetsHBITMAPFromFile(seafile::utils::utf8ToWString(filepath_), phbmp);
         seaf_ext_log("current dir is not in seadrive dir, current dir in diskletter is [%s],\
             seadrive mount diskletter is [%s]",\
             current_disk_letter.c_str(),\
