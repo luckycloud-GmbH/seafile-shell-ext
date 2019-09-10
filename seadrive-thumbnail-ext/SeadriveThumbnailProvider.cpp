@@ -155,9 +155,10 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
             GetsHBITMAPFromFile(seafile::utils::utf8ToWString(filepath_), phbmp);
         } else {
+            seaf_ext_log("the file have no been cached");
             std::string cached_thumbnail_path;
             seafile::GetThumbnailFromServer get_thumbnail_cmd(filepath_);
-            if (get_thumbnail_cmd.sendAndWait(&cached_thumbnail_path)) {
+            if (!get_thumbnail_cmd.sendAndWait(&cached_thumbnail_path)) {
                 seaf_ext_log("send get thumbnail commmand failed");
             }
 
@@ -167,8 +168,6 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
             } else {
                 GetsHBITMAPFromFile(seafile::utils::utf8ToWString(cached_thumbnail_path), phbmp);
             }
-            seaf_ext_log("the file have no been cached");
-
         }
 
     } else { // the path of register file type not in seadrive dir

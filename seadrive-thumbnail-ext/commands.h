@@ -104,7 +104,7 @@ protected:
 
 };
 
-// getFile Cached status
+// Get file cached status
 class GetCachedStatusCommand : public AppletCommand <bool> {
 
 public:
@@ -121,7 +121,7 @@ private:
     std::string path_;
 };
 
-// get seadrive mount dir
+// Get seadrive mount disk letter
 class GetSeadriveMountLetter : public AppletCommand <DISK_LETTER_TYPE> {
 public:
     GetSeadriveMountLetter();
