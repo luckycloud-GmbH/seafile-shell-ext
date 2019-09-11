@@ -72,6 +72,4 @@ private:
     Gdiplus::Bitmap* hbitmap_;
 
     void GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP *hbmap);
-    void freeBitmapResource();
 };
-

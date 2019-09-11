@@ -200,18 +200,9 @@ void SeadriveThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* 
     if (status != Gdiplus::Ok) {
         seaf_ext_log("get hbitmap failed");
     }
-    freeBitmapResource();
-    return;
-}
-
-void SeadriveThumbnailProvider::freeBitmapResource() {
-
-    if (hbitmap_) {
-        delete hbitmap_;
-        hbitmap_ = NULL;
-    }
+    delete hbitmap_;
+    hbitmap_ = NULL;
     return;
 }
 
 #pragma endregion
-

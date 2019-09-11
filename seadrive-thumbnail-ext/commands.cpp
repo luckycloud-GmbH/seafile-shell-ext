@@ -26,7 +26,7 @@ std::string GetCachedStatusCommand::serializeForDrive()
 bool GetCachedStatusCommand::parseDriveResponse(const std::string& raw_resp,
                                                 bool *status)
 {
-    if (raw_resp == "Cached") {
+    if (raw_resp == "cached") {
         *status = true;
     } else {
         *status = false;
