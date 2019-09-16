@@ -1,6 +1,6 @@
 # SeaDrive Thumbnail Extension
 
-This project is designed to create *SeaDrive Thumbnail Extension* which used to create thumbnail. Currently, MSDN recommended developers to derive Thumbnail Provider class from **IInitializeWithStream** instead of **IInitializeWithFile** because of system security. But in some conditions, we would like to deal files with its full path. Obviously, **IInitializeWithStream** is not what we want in this case. It's HARD to work with IInitializeWithFile since there is little information about how to use **IInitializeWithFile** on the Internet.
+This project is designed to create *SeaDrive Thumbnail Extension* which used to create thumbnail. Currently, MSDN recommended developers to derive Thumbnail Provider class from **IInitializeWithStream** instead of **IInitializeWithFile** because of system security. But in some conditions, IInitializeWithStream cannot be used in our code because the parameter of this interface is the stream of the file content, which means that explorer will try to read the contents of the current file, which is exactly what we want to avoid.
 
 ## How to use
 

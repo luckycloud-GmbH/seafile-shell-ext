@@ -180,7 +180,7 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
         );
     }
 
-    cx = 64;
+    // cx = 64;
     return 0;
 }
 
