@@ -329,9 +329,6 @@ std::string splitPath(const std::string& path, int* pos)
     }
 
     std::string p = normalizedPath(path);
-    while (p.size() > 1 && p[-1] == '/') {
-        p = p.substr(0, p.size() - 1);
-    }
     if (p.size() == 1) {
         return p;
     }
@@ -363,9 +360,6 @@ std::string getDiskLetterPath(const std::string& path, int* pos)
     }
 
     std::string p = normalizedPath(path);
-    while (p.size() > 1 && p[-1] == '/') {
-        p = p.substr(0, p.size() - 1);
-    }
     if (p.size() == 1) {
         return p;
     }
