@@ -190,18 +190,27 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
 
 void SeadriveThumbnailProvider::GetsHBITMAPFromFile(LPCWSTR pfilePath, HBITMAP* hbmap)
 {
-    hbitmap_ = Gdiplus::Bitmap::FromFile(pfilePath);
+    using namespace Gdiplus;
+    GdiplusStartupInput gdiplusStartupInput;
+    ULONG_PTR gdiplusToken;
+    // Initialize GDI+.
+    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
+    hbitmap_ = Bitmap::FromFile(pfilePath);
     if (hbitmap_ == NULL) {
         seaf_ext_log("load bitmap from file failed");
+        GdiplusShutdown(gdiplusToken);
         return;
     }
-    Gdiplus::Status status = hbitmap_->GetHBITMAP(NULL, hbmap);
+    Status status = hbitmap_->GetHBITMAP(NULL, hbmap);
 
-    if (status != Gdiplus::Ok) {
+    if (status != Ok) {
         seaf_ext_log("get hbitmap failed");
     }
     delete hbitmap_;
     hbitmap_ = NULL;
+
+    GdiplusShutdown(gdiplusToken);
     return;
 }
 
