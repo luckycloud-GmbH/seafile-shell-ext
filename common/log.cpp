@@ -5,6 +5,15 @@
 #include "ext-utils.h"
 #include "log.h"
 
+#ifndef SF_EXT_LOG
+#define SF_EXT_LOG seafile_ext.log
+#endif
+
+#define STR(s)     #s
+#define STRINGIZE(x) STR(x)
+
+#define SF_EXT_LOG_STR STRINGIZE(SF_EXT_LOG)
+
 namespace {
 
 static FILE *log_fp;
@@ -15,7 +24,7 @@ std::string getLogPath()
     if (home.empty())
         return "";
 
-    return home + "/seafile_ext.log";
+    return home + "/" + SF_EXT_LOG_STR;
 }
 
 

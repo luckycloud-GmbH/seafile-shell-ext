@@ -1,39 +1,10 @@
-/****************************** Module Header ******************************\
-Module Name:  dllmain.cpp
-Project:      CppShellExtThumbnailHandler
-Copyright (c) Microsoft Corporation.
-
-The file implements DllMain, and the DllGetClassObject, DllCanUnloadNow,
-DllRegisterServer, DllUnregisterServer functions that are necessary for a COM
-DLL.
-
-DllGetClassObject invokes the class factory defined in ClassFactory.h/cpp and
-queries to the specific interface.
-
-DllCanUnloadNow checks if we can unload the component from the memory.
-
-DllRegisterServer registers the COM server and the thumbnail handler in the
-registry by invoking the helper functions defined in Reg.h/cpp. The thumbnail
-handler is associated with the .recipe file class.
-
-DllUnregisterServer unregisters the COM server and the thumbnail handler.
-
-This source is subject to the Microsoft Public License.
-See http://www.microsoft.com/opensource/licenses.mspx#Ms-PL.
-All other rights reserved.
-
-THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
-EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
-\***************************************************************************/
-
 #include <windows.h>
 #include <Guiddef.h>
 #include <vector>
 #include <string>
 
 #include <shlobj.h>                 // For SHChangeNotify
-#include "ClassFactory.h"           // For the class factory
+#include "class-factory.h"           // For the class factory
 #include "Reg.h"
 #include "log.h"
 #include "ext-utils.h"
@@ -47,7 +18,7 @@ const CLSID CLSID_SeadriveThumbnailProvider =
 // Customization Thumbnail file type list.
 std::vector<std::wstring> imageformatlist = {L"png", L"jpeg", L"jpg"};
 
-HINSTANCE   g_hInst     = NULL;
+HINSTANCE   g_hmodThisDll     = NULL;
 long        g_cDllRef   = 0;
 
 
@@ -58,7 +29,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
     case DLL_PROCESS_ATTACH:
         // Hold the instance of this DLL module, we will use it to get the
         // path of the DLL to register the component.
-        g_hInst = hModule;
+        g_hmodThisDll = hModule;
         DisableThreadLibraryCalls(hModule);
         break;
     case DLL_THREAD_ATTACH:
@@ -86,6 +57,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 //
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv)
 {
+    seaf_ext_log("DllGetClassObject called\n");
     HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
     if (IsEqualCLSID(CLSID_SeadriveThumbnailProvider, rclsid))
     {
@@ -112,6 +84,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv)
 //
 STDAPI DllCanUnloadNow(void)
 {
+    // seaf_ext_log("DllCanUnloadNow called\n");
     return g_cDllRef > 0 ? S_FALSE : S_OK;
 }
 
@@ -127,7 +100,7 @@ STDAPI DllRegisterServer(void)
     HRESULT hr;
 
     wchar_t szModule[MAX_PATH];
-    if (GetModuleFileName(g_hInst, szModule, ARRAYSIZE(szModule)) == 0)
+    if (GetModuleFileName(g_hmodThisDll, szModule, ARRAYSIZE(szModule)) == 0)
     {
         hr = HRESULT_FROM_WIN32(GetLastError());
         return hr;
@@ -173,7 +146,7 @@ STDAPI DllUnregisterServer(void)
     HRESULT hr = S_OK;
 
     wchar_t szModule[MAX_PATH];
-    if (GetModuleFileName(g_hInst, szModule, ARRAYSIZE(szModule)) == 0)
+    if (GetModuleFileName(g_hmodThisDll, szModule, ARRAYSIZE(szModule)) == 0)
     {
         hr = HRESULT_FROM_WIN32(GetLastError());
         return hr;

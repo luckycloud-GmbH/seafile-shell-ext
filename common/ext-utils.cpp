@@ -1,4 +1,4 @@
-#include "ext-comm.h"
+#include "ext-common.h"
 #include <wincrypt.h>
 #include <io.h>
 #include <shellapi.h>
@@ -15,12 +15,11 @@
 #include "log.h"
 #include "ext-utils.h"
 
-#include <UserEnv.h>
-#pragma comment(lib, "Userenv.lib")
+extern HINSTANCE g_hmodThisDll;
 
 namespace {
 
-const int kPipeWaitTimeMSec = 5000;
+const int kPipeWaitTimeMSec = 1000;
 
 class OverLappedWrapper
 {
@@ -29,10 +28,10 @@ public:
         memset(&ol_, 0, sizeof(ol_));
         ol_.Offset = ol_.OffsetHigh = 0;
         HANDLE h_ev = CreateEvent
-        (NULL,                  /* security attribute */
-            FALSE,                 /* manual reset */
-            FALSE,                 /* initial state  */
-            NULL);                 /* event name */
+            (NULL,                  /* security attribute */
+             FALSE,                 /* manual reset */
+             FALSE,                 /* initial state  */
+             NULL);                 /* event name */
 
         ol_.hEvent = h_ev;
     }
@@ -41,7 +40,7 @@ public:
         CloseHandle(ol_.hEvent);
     }
 
-    OVERLAPPED* get() { return &ol_; }
+    OVERLAPPED *get() { return &ol_; }
 
 private:
     OVERLAPPED ol_;
@@ -56,9 +55,9 @@ namespace utils {
 Mutex::Mutex()
 {
     handle_ = CreateMutex
-    (NULL,                  /* securitry attr */
-        FALSE,                 /* own the mutex immediately after create */
-        NULL);                 /* name */
+        (NULL,                  /* securitry attr */
+         FALSE,                 /* own the mutex immediately after create */
+         NULL);                 /* name */
 }
 
 Mutex::~Mutex()
@@ -80,7 +79,7 @@ void Mutex::unlock()
     ReleaseMutex(handle_);
 }
 
-MutexLocker::MutexLocker(Mutex* mutex)
+MutexLocker::MutexLocker(Mutex *mutex)
     : mu_(mutex)
 {
     mu_->lock();
@@ -92,12 +91,12 @@ MutexLocker::~MutexLocker()
 }
 
 
-void regulatePath(char* p)
+void regulatePath(char *p)
 {
     if (!p)
         return;
 
-    char* s = p;
+    char *s = p;
     /* Use capitalized C/D/E, etc. */
     if (s[0] >= 'a')
         s[0] = toupper(s[0]);
@@ -105,7 +104,7 @@ void regulatePath(char* p)
     /* Use / instead of \ */
     while (*s) {
         if (*s == '\\')
-            * s = '/';
+            *s = '/';
         s++;
     }
 
@@ -119,16 +118,16 @@ void regulatePath(char* p)
 
 std::string getHomeDir()
 {
-    static char* home;
+    static char *home;
 
     if (home)
         return home;
 
-    char buf[MAX_PATH] = { '\0' };
+    char buf[MAX_PATH] = {'\0'};
 
     if (!home) {
         /* Try env variable first. */
-        GetEnvironmentVariableA("HOME", buf, MAX_PATH);
+        GetEnvironmentVariableA("USERPROFILE", buf, MAX_PATH);
         if (buf[0] != '\0')
             home = strdup(buf);
     }
@@ -137,7 +136,7 @@ std::string getHomeDir()
         /* No `HOME' ENV; Try user profile */
         HANDLE hToken = NULL;
         DWORD len = MAX_PATH;
-        if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+        if (OpenProcessToken (GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
             GetUserProfileDirectoryA(hToken, buf, &len);
             CloseHandle(hToken);
             if (buf[0] != '\0')
@@ -151,26 +150,24 @@ std::string getHomeDir()
 }
 
 bool
-    doPipeWait(HANDLE pipe, OVERLAPPED* ol, DWORD len)
+doPipeWait (HANDLE pipe, OVERLAPPED *ol, DWORD len)
 {
     DWORD bytes_rw, result;
-    result = WaitForSingleObject(ol->hEvent, kPipeWaitTimeMSec);
+    result = WaitForSingleObject (ol->hEvent, kPipeWaitTimeMSec);
     if (result == WAIT_OBJECT_0) {
         if (!GetOverlappedResult(pipe, ol, &bytes_rw, false)
             || bytes_rw != len) {
-            seaf_ext_log("async read failed: %s",
-                formatErrorMessage().c_str());
+            seaf_ext_log ("async read failed: %s",
+                            formatErrorMessage().c_str());
             return false;
         }
-    }
-    else if (result == WAIT_TIMEOUT) {
-        seaf_ext_log("connection timeout");
+    } else if (result == WAIT_TIMEOUT) {
+        seaf_ext_log ("connection timeout");
         return false;
 
-    }
-    else {
-        seaf_ext_log("failed to communicate with seafil client: %s",
-            formatErrorMessage().c_str());
+    } else {
+        seaf_ext_log ("failed to communicate with seafil client: %s",
+                      formatErrorMessage().c_str());
         return false;
     }
 
@@ -178,18 +175,17 @@ bool
 }
 
 bool
-    checkLastError()
+checkLastError()
 {
     DWORD last_error = GetLastError();
     if (last_error != ERROR_IO_PENDING && last_error != ERROR_SUCCESS) {
         if (last_error == ERROR_BROKEN_PIPE || last_error == ERROR_NO_DATA
             || last_error == ERROR_PIPE_NOT_CONNECTED) {
-            seaf_ext_log("connection broken with error: %s",
-                formatErrorMessage().c_str());
-        }
-        else {
-            seaf_ext_log("failed to communicate with seafile client: %s",
-                formatErrorMessage().c_str());
+            seaf_ext_log ("connection broken with error: %s",
+                          formatErrorMessage().c_str());
+        } else {
+            seaf_ext_log ("failed to communicate with seafile client: %s",
+                          formatErrorMessage().c_str());
         }
         return false;
     }
@@ -197,12 +193,12 @@ bool
 }
 
 bool
-    pipeReadN(HANDLE pipe,
-        void* buf,
-        uint32_t len)
+pipeReadN (HANDLE pipe,
+           void *buf,
+           uint32_t len)
 {
     OverLappedWrapper ol;
-    bool ret = ReadFile(
+    bool ret= ReadFile(
         pipe,                  // handle to pipe
         buf,                    // buffer to write from
         (DWORD)len,             // number of bytes to read
@@ -213,7 +209,7 @@ bool
         return false;
     }
 
-    if (!doPipeWait(pipe, ol.get(), (DWORD)len)) {
+    if (!doPipeWait (pipe, ol.get(), (DWORD)len)) {
         return false;
     }
 
@@ -221,9 +217,9 @@ bool
 }
 
 bool
-    pipeWriteN(HANDLE pipe,
-        const void* buf,
-        uint32_t len)
+pipeWriteN(HANDLE pipe,
+           const void *buf,
+           uint32_t len)
 {
     OverLappedWrapper ol;
     bool ret = WriteFile(
@@ -243,19 +239,19 @@ bool
     return true;
 }
 
-bool doInThread(LPTHREAD_START_ROUTINE func, void* data)
+bool doInThread(LPTHREAD_START_ROUTINE func, void *data)
 {
     DWORD tid = 0;
     HANDLE thread = CreateThread
-    (NULL,                  /* security attr */
-        0,                     /* stack size, 0 for default */
-        func,                  /* start address */
-        (void*)data,          /* param*/
-        0,                     /* creation flags */
-        &tid);                 /* thread ID */
+        (NULL,                  /* security attr */
+         0,                     /* stack size, 0 for default */
+         func,                  /* start address */
+         (void *)data,          /* param*/
+         0,                     /* creation flags */
+         &tid);                 /* thread ID */
 
     if (!thread) {
-        seaf_ext_log("failed to create thread");
+        seaf_ext_log ("failed to create thread");
         return false;
     }
 
@@ -270,18 +266,18 @@ std::string formatErrorMessage()
     if (error_code == 0) {
         return "no error";
     }
-    char buf[256] = { 0 };
+    char buf[256] = {0};
     ::FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL,
-        error_code,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        buf,
-        sizeof(buf) - 1,
-        NULL);
+                    NULL,
+                    error_code,
+                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    buf,
+                    sizeof(buf) - 1,
+                    NULL);
     return buf;
 }
 
-std::vector<std::string> split(const std::string& s, char delim)
+std::vector<std::string> split(const std::string &s, char delim)
 {
     std::vector<std::string> elems;
     std::stringstream ss(s);
@@ -310,7 +306,7 @@ uint64_t currentMSecsSinceEpoch()
     SystemTimeToFileTime(&st, &ft);
 
     ULARGE_INTEGER u;
-    u.LowPart = ft.dwLowDateTime;
+    u.LowPart  = ft.dwLowDateTime;
     u.HighPart = ft.dwHighDateTime;
 
     // See http://stackoverflow.com/questions/6161776/convert-windows-filetime-to-second-in-unix-linux
@@ -322,13 +318,16 @@ uint64_t currentMSecsSinceEpoch()
     return temp;
 }
 
-std::string splitPath(const std::string& path, int* pos)
+std::string splitPath(const std::string& path, int *pos)
 {
     if (path.size() == 0) {
         return "";
     }
 
     std::string p = normalizedPath(path);
+    while (p.size() > 1 && p[-1] == '/') {
+        p = p.substr(0, p.size() - 1);
+    }
     if (p.size() == 1) {
         return p;
     }
@@ -353,40 +352,6 @@ std::string getParentPath(const std::string& path)
     return p.substr(0, pos);
 }
 
-std::string getDiskLetterPath(const std::string& path, int* pos)
-{
-    if (path.size() == 0) {
-        return "";
-    }
-
-    std::string p = normalizedPath(path);
-    if (p.size() == 1) {
-        return p;
-    }
-
-    *pos = p.find("/");
-    return p;
-}
-
-std::string getDiskLetterName(const std::string& path)
-{
-
-    int pos;
-    std::string p = getDiskLetterPath(path, &pos);
-    if (p.size() <= 1) {
-        return p;
-    }
-
-    if (pos == -1)
-        return "";
-
-    if (pos == 0)
-        return "/";
-	std::string disk_letter = p.substr(0, pos);
-	transform(disk_letter.begin(), disk_letter.end(), disk_letter.begin(), ::tolower);
-    return disk_letter;
-}
-
 std::string getBaseName(const std::string& path)
 {
     int pos;
@@ -408,7 +373,7 @@ std::string getThisDllPath()
     if (module_filename[0] == '\0') {
         DWORD module_size;
         module_size = GetModuleFileNameA(
-            g_hInst, module_filename, MAX_PATH);
+            g_hmodThisDll, module_filename, MAX_PATH);
         if (!module_size)
             return "";
 
@@ -425,18 +390,18 @@ std::string getThisDllFolder()
     return dll.empty() ? "" : getParentPath(dll);
 }
 
-wchar_t* localeToWString(const std::string& src)
+wchar_t *localeToWString(const std::string& src)
 {
     wchar_t dst[4096];
     int len;
 
     len = MultiByteToWideChar
-    (CP_ACP,                /* multibyte code page */
-        0,                     /* flags */
-        src.c_str(),           /* src */
-        -1,                    /* src len, -1 for all includes \0 */
-        dst,                   /* dst */
-        sizeof(dst) / sizeof(wchar_t));          /* dst buf len */
+        (CP_ACP,                /* multibyte code page */
+         0,                     /* flags */
+         src.c_str(),           /* src */
+         -1,                    /* src len, -1 for all includes \0 */
+         dst,                   /* dst */
+         sizeof(dst) / sizeof(wchar_t));          /* dst buf len */
 
     if (len <= 0) {
         return NULL;
@@ -446,20 +411,20 @@ wchar_t* localeToWString(const std::string& src)
 }
 
 
-std::string wStringToLocale(const wchar_t* src)
+std::string wStringToLocale(const wchar_t *src)
 {
     char dst[4096];
     int len;
 
     len = WideCharToMultiByte
-    (CP_ACP,        /* multibyte code page */
-        0,             /* flags */
-        src,           /* src */
-        -1,            /* src len, -1 for all includes \0 */
-        dst,           /* dst */
-        sizeof(dst),   /* dst buf len */
-        NULL,          /* default char */
-        NULL);         /* BOOL flag indicates default char is used */
+        (CP_ACP,        /* multibyte code page */
+         0,             /* flags */
+         src,           /* src */
+         -1,            /* src len, -1 for all includes \0 */
+         dst,           /* dst */
+         sizeof(dst),   /* dst buf len */
+         NULL,          /* default char */
+         NULL);         /* BOOL flag indicates default char is used */
 
     if (len <= 0) {
         return "";
@@ -468,20 +433,20 @@ std::string wStringToLocale(const wchar_t* src)
     return dst;
 }
 
-std::string wStringToUtf8(const wchar_t* src)
+std::string wStringToUtf8(const wchar_t *src)
 {
     char dst[4096];
     int len;
 
     len = WideCharToMultiByte
-    (CP_UTF8,               /* multibyte code page */
-        0,                     /* flags */
-        src,                   /* src */
-        -1,                    /* src len, -1 for all includes \0 */
-        dst,                   /* dst */
-        sizeof(dst),           /* dst buf len */
-        NULL,                  /* default char */
-        NULL);                 /* BOOL flag indicates default char is used */
+        (CP_UTF8,               /* multibyte code page */
+         0,                     /* flags */
+         src,                   /* src */
+         -1,                    /* src len, -1 for all includes \0 */
+         dst,                   /* dst */
+         sizeof(dst),           /* dst buf len */
+         NULL,                  /* default char */
+         NULL);                 /* BOOL flag indicates default char is used */
 
     if (len <= 0) {
         return "";
@@ -490,18 +455,18 @@ std::string wStringToUtf8(const wchar_t* src)
     return dst;
 }
 
-wchar_t* utf8ToWString(const std::string& src)
+wchar_t *utf8ToWString(const std::string& src)
 {
     wchar_t dst[4096];
     int len;
 
     len = MultiByteToWideChar
-    (CP_UTF8,                        /* multibyte code page */
-        0,                              /* flags */
-        src.c_str(),                    /* src */
-        -1,                             /* src len, -1 for all includes \0 */
-        dst,                            /* dst */
-        sizeof(dst) / sizeof(wchar_t)); /* dst buf len */
+        (CP_UTF8,                        /* multibyte code page */
+         0,                              /* flags */
+         src.c_str(),                    /* src */
+         -1,                             /* src len, -1 for all includes \0 */
+         dst,                            /* dst */
+         sizeof(dst) / sizeof(wchar_t)); /* dst buf len */
 
     if (len <= 0) {
         return NULL;
@@ -517,57 +482,68 @@ bool isShellExtEnabled()
     // that.
     HKEY root = HKEY_CURRENT_USER;
     HKEY parent_key;
-    wchar_t* software_seafile = localeToWString("Software\\Seafile");
+    wchar_t *software_seafile = localeToWString("Software\\Seafile");
     LONG result = RegOpenKeyExW(root,
-        software_seafile,
-        0L,
-        KEY_ALL_ACCESS,
-        &parent_key);
+                                software_seafile,
+                                0L,
+                                KEY_ALL_ACCESS,
+                                &parent_key);
     free(software_seafile);
     if (result != ERROR_SUCCESS) {
         return true;
     }
 
-    char buf[MAX_PATH] = { 0 };
+    char buf[MAX_PATH] = {0};
     DWORD len = sizeof(buf);
-    wchar_t* shell_ext_disabled = localeToWString("ShellExtDisabled");
-    result = RegQueryValueExW(parent_key,
-        shell_ext_disabled,
-        NULL,             /* reserved */
-        NULL,             /* output type */
-        (LPBYTE)buf,      /* output data */
-        &len);            /* output length */
+    wchar_t *shell_ext_disabled = localeToWString("ShellExtDisabled");
+    result = RegQueryValueExW (parent_key,
+                               shell_ext_disabled,
+                               NULL,             /* reserved */
+                               NULL,             /* output type */
+                               (LPBYTE)buf,      /* output data */
+                               &len);            /* output length */
     RegCloseKey(parent_key);
     free(shell_ext_disabled);
 
     return result != ERROR_SUCCESS;
 }
 
-char* b64encode(const char* input)
+char *b64encode(const char *input)
 {
-    char buf[32767] = { 0 };
+    char buf[32767] = {0};
     DWORD retlen = 32767;
-    CryptBinaryToStringA((BYTE*)input, strlen(input), CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, buf, &retlen);
+    CryptBinaryToStringA((BYTE*) input, strlen(input), CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, buf, &retlen);
     return strdup(buf);
 }
 
-std::string getLocalPipeName(const char* pipe_name)
+std::string getLocalPipeName(const char *pipe_name)
 {
     const DWORD BUF_SIZE = 32767;
-    DWORD buf_char_count = 32767;
     char user_name_buf[BUF_SIZE];
+    DWORD buf_char_count = BUF_SIZE;
 
     if (GetUserNameA(user_name_buf, &buf_char_count) == 0) {
-        seaf_ext_log("Failed to get user name, GLE=%lu\n",
-            GetLastError());
+        seaf_ext_log ("Failed to get user name, GLE=%lu\n",
+                      GetLastError());
         return pipe_name;
-    } else {
+    }
+    else {
         std::string ret(pipe_name);
-        char* encoded = b64encode(user_name_buf);
+        char *encoded = b64encode(user_name_buf);
         ret += encoded;
         free(encoded);
         return ret;
     }
+}
+
+std::string diskLetterFromPath(const std::string& path)
+{
+    int ord = PathGetDriveNumberA(path.c_str());
+    if (ord < 0) {
+        return "";
+    }
+    std::string letter((char)('a' + (char)ord));
+    return letter + ":";
 }
 
 } // namespace utils

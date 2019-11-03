@@ -1,9 +1,11 @@
 #define __STDC_LIMIT_MACROS
+#include "ext-common.h"
 
 #include <memory>
 
-#include "ext-comm.h"
+#include "ext-utils.h"
 #include "log.h"
+
 #include "applet-connection.h"
 
 namespace {
@@ -67,8 +69,8 @@ AppletConnection::connect ()
     if (pipe_ != INVALID_HANDLE_VALUE) {
         CloseHandle (pipe_);
     }
-    pipe_ = CreateFile(
-        seafile::utils::localeToWString(pipe_name_),       // pipe name
+    pipe_ = CreateFileA(
+        pipe_name_,       // pipe name
         GENERIC_READ |          // read and write access
         GENERIC_WRITE,
         0,                      // no sharing
@@ -79,7 +81,7 @@ AppletConnection::connect ()
 
     if (pipe_ == INVALID_HANDLE_VALUE) {
         if (GetLastError() != ERROR_FILE_NOT_FOUND) {
-           seaf_ext_log("Failed to create named pipe: %s", utils::formatErrorMessage().c_str());
+            seaf_ext_log("Failed to create named pipe: %s", utils::formatErrorMessage().c_str());
         }
         connected_ = false;
         last_conn_failure_ = utils::currentMSecsSinceEpoch();
@@ -197,7 +199,7 @@ bool AppletConnection::sendWithReconnect(const std::string& cmd)
         } else if (!connected_ && connect()) {
             // Retry one more time when connection is broken. This normally
             // happens when seafile client was restarted.
-            seaf_ext_log("reconnected to seafile cient");
+            seaf_ext_log ("reconnected to seafile cient");
             if (writeRequest(cmd)) {
                 return true;
             }
