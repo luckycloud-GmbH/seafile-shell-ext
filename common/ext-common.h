@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#ifdef _MSC_VER
+#ifndef _MSC_VER
 #include <unistd.h>
 #endif
 
