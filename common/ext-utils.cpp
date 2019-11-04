@@ -19,8 +19,6 @@ extern HINSTANCE g_hmodThisDll;
 
 namespace {
 
-const int kPipeWaitTimeMSec = 1000;
-
 class OverLappedWrapper
 {
 public:

@@ -3,7 +3,7 @@ PROJECT(seadrive_thumbnail_ext CXX)
 
 ################################################################################
 # Compiler and linker options
-ADD_DEFINITIONS(-Wall -DWIN32_LEAN_AND_MEAN -DUNICODE -D_CRT_SECURE_NO_WARNINGS -DSF_EXT_LOG=seadrive_thumbnail_ext.log)
+ADD_DEFINITIONS(-Wall -DWIN32_LEAN_AND_MEAN -DUNICODE -D_CRT_SECURE_NO_WARNINGS)
 
 SET(CMAKE_CXX_STANDARD 11)
 
