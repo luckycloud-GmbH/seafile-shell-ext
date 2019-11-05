@@ -28,6 +28,7 @@ SET(SOURCE_FILES
   commands.cpp
   dllmain.cpp
   provider.cpp
+  ext-config.cpp
 )
 
 SET(LIBS

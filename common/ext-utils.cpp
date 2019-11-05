@@ -537,7 +537,7 @@ std::string diskLetterFromPath(const std::string& path)
     if (ord < 0) {
         return "";
     }
-    std::string letter((char)('a' + (char)ord));
+    std::string letter({(char)('a' + (char)ord)});
     return letter + ":";
 }
 

@@ -19,7 +19,7 @@ IF (NOT (${CMAKE_BUILD_TYPE} MATCHES Release))
 ENDIF()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -std=c++0x")
 
-ADD_DEFINITIONS(-D_WIN32_WINNT=${WINVER} -DWINVER=${WINVER} -DSF_EXT_LOG=seafile_ext.log)
+ADD_DEFINITIONS(-D_WIN32_WINNT=${WINVER} -DWINVER=${WINVER})
 
 SET(CMAKE_CXX_CREATE_SHARED_LIBRARY
     "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
@@ -36,6 +36,7 @@ SET(ext_sources
   commands.cpp
   repo-info.cpp
   i18n.cpp
+  ext-config.cpp
   seafile_ext.def
   seafile_ext.rc
 )
