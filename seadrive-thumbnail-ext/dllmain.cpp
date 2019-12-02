@@ -57,7 +57,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 //
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv)
 {
-    seaf_ext_log("DllGetClassObject called\n");
+    // seaf_ext_log("DllGetClassObject called\n");
     HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
     if (IsEqualCLSID(CLSID_SeadriveThumbnailProvider, rclsid))
     {

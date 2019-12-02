@@ -73,7 +73,7 @@ bool SeadriveThumbnailProvider::getDiskLetter(std::string *disk_letter)
 
     if (disk_letter_cache_) {
         *disk_letter = *(disk_letter_cache_.get());
-        seaf_ext_log("use cached disk letter!");
+        // seaf_ext_log("use cached disk letter!");
         return true;
     }
 
@@ -81,11 +81,11 @@ bool SeadriveThumbnailProvider::getDiskLetter(std::string *disk_letter)
     std::string letter;
 
     if (!disk_letter_cmd.sendAndWait(&letter)) {
-        seaf_ext_log("send get mount disk letter command failed");
+        // seaf_ext_log("send get mount disk letter command failed");
         return false;
     }
 
-    seaf_ext_log("disk letter = %s", letter.c_str());
+    // seaf_ext_log("disk letter = %s", letter.c_str());
     disk_letter_cache_.reset(new std::string(letter));
     *disk_letter = letter;
     return true;
@@ -98,11 +98,11 @@ bool SeadriveThumbnailProvider::isFileCached(const std::string& path)
 
     bool cached;
     if (!cache_status_cmd.sendAndWait(&cached)) {
-        seaf_ext_log("send get file cached status failed");
+        // seaf_ext_log("send get file cached status failed");
         return false;
     }
 
-    seaf_ext_log("the file [%s] cached = %s", path.c_str(), cached ? "yes" : "no");
+    // seaf_ext_log("the file [%s] cached = %s", path.c_str(), cached ? "yes" : "no");
     return cached;
 }
 
@@ -113,12 +113,11 @@ bool SeadriveThumbnailProvider::isFileLocalOrCached(const std::string& path)
         // If we fail to get the montpoint, then seadrive may be
         // not running. In such case we treat all files as local
         // files.
-        seaf_ext_log("send get mount disk letter command failed");
+        // seaf_ext_log("send get mount disk letter command failed");
         return true;
     }
 
     std::string current_disk_letter = utils::diskLetterFromPath(path);
-    seaf_ext_log("current_disk_letter = %s", current_disk_letter.c_str());
     if (disk_letter != current_disk_letter) {
         // A local file
         return true;
@@ -141,11 +140,11 @@ IFACEMETHODIMP SeadriveThumbnailProvider::GetThumbnail(UINT cx, HBITMAP *phbmp,
     if (isFileLocalOrCached(current_file_)) {
         return extractWithGDI(utils::utf8ToWString(current_file_), phbmp);
     } else {
-        seaf_ext_log("file %s is not cached", current_file_.c_str());
+        // seaf_ext_log("file %s is not cached", current_file_.c_str());
         std::string png_path;
         seafile::FetchThumbnailCommand fetch_thumbnail_cmd(current_file_);
         if (!fetch_thumbnail_cmd.sendAndWait(&png_path) || png_path.empty()) {
-            seaf_ext_log("send get thumbnail commmand failed");
+            // seaf_ext_log("send get thumbnail commmand failed");
             return E_FAIL;
         }
 
@@ -171,11 +170,11 @@ private:
 
 HRESULT SeadriveThumbnailProvider::extractWithGDI(LPCWSTR wpath, HBITMAP* hbmap)
 {
-    seaf_ext_log("extracting with GDI: %s", utils::wStringToUtf8(wpath).c_str());
+    // seaf_ext_log("extracting with GDI: %s", utils::wStringToUtf8(wpath).c_str());
     GDIResource resource;
     std::unique_ptr<gdi::Bitmap> bitmap(gdi::Bitmap::FromFile(wpath));
     if (!bitmap) {
-        seaf_ext_log("failed to load bitmap from file %s", utils::wStringToUtf8(wpath).c_str());
+        // seaf_ext_log("failed to load bitmap from file %s", utils::wStringToUtf8(wpath).c_str());
         return E_FAIL;
     }
 
