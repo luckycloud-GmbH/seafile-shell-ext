@@ -3,7 +3,8 @@
 set -e -x
 
 if ! [[ -f CMakeCache.txt ]]; then
-    cmake -G "Visual Studio 14 2015 Win64" . # 如果没有 Win64 编译出来的就是 32 位的 DLL
+    # TODO: compile both 64bit and 32bit DLL
+    cmake -G "Visual Studio 14 2015 Win64" .
 fi
 
 # /nr:false is to prevent msbuild not exiting
