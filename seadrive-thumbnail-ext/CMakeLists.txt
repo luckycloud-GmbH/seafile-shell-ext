@@ -17,8 +17,6 @@ SET(DEFS ${CMAKE_CURRENT_SOURCE_DIR}/ExportFunctions.def)
 
 ################################################################################
 # Sources and libraries
-FILE(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-
 SET(SOURCE_FILES
   Reg.cpp
   ../common/applet-connection.cpp
@@ -47,8 +45,8 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}/../seadrive-thumbnail-ext
 )
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${DEFS})
+ADD_LIBRARY(seadrive_ext SHARED ${SOURCE_FILES} ${DEFS})
 TARGET_LINK_LIBRARIES(
-  ${PROJECT_NAME}
+  seadrive_ext
   ${LIBS}
 )
