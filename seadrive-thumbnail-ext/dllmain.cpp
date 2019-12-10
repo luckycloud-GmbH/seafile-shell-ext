@@ -10,9 +10,9 @@
 #include "ext-utils.h"
 
 // GUID for the thumbnail extension.
-// {F30F39C6-A383-4CB1-9654-F2FC32EA0000}
+// {AD201912-A383-4CB1-9654-F2FC32EA0000}
 const CLSID CLSID_SeadriveThumbnailProvider =
-{ 0xF30F39C6, 0xA383, 0x4CB1, {0x96, 0x54, 0xF2, 0xFC, 0x32, 0xEA, 0x00, 0x00}};
+{ 0xAD201912, 0xA383, 0x4CB1, {0x96, 0x54, 0xF2, 0xFC, 0x32, 0xEA, 0x00, 0x00}};
 
 // Customization Thumbnail file type list.
 std::vector<std::wstring> imageformatlist = {L"png", L"jpeg", L"jpg"};
