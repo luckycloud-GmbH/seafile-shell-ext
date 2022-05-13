@@ -26,8 +26,8 @@ bool shouldIgnorePath(const std::string& path)
     return FALSE;
 }
 
-const char *kMainMenuNameSeafile = "Seafile";
-const char *kMainMenuNameSeaDrive = "SeaDrive";
+const char *kMainMenuNameSeafile = "luckycloud";
+const char *kMainMenuNameSeaDrive = "luckyDrive";
 
 }
 
